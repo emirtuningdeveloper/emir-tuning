@@ -37,24 +37,37 @@ npm install
 - [Firebase Console](https://console.firebase.google.com/) üzerinden yeni bir proje oluşturun
 - Firestore Database'i etkinleştirin
 - Web uygulaması ekleyin ve konfigürasyon bilgilerini alın
-- `.env.local` dosyası oluşturun ve Firebase bilgilerinizi ekleyin:
 
-```bash
-cp .env.example .env.local
-```
+4. **Google Drive API Konfigürasyonu**
 
-`.env.local` dosyasını düzenleyin ve Firebase bilgilerinizi girin:
+- [Google Cloud Console](https://console.cloud.google.com/) üzerinden bir Service Account oluşturun
+- Service Account'a Drive API erişimi verin
+- Private Key'i indirin ve JSON formatından email ve private key'i alın
+- Google Drive'da görselleri saklayacağınız bir klasör oluşturun ve klasör ID'sini alın
+
+5. **Environment Variables**
+
+`.env.local` dosyası oluşturun ve aşağıdaki bilgileri ekleyin:
 
 ```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCeIWQMuVfXI5CnBmBGqGGHbxKT80u24vM
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=emir-tuning.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=emir-tuning
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=emir-tuning.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=991446420644
+NEXT_PUBLIC_FIREBASE_APP_ID=1:991446420644:web:64400054067aa2e77cea31
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-BVBNB6J4Z3
+
+# Google Drive API Configuration
+GOOGLE_SERVICE_ACCOUNT_EMAIL=your_service_account_email@project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour private key here\n-----END PRIVATE KEY-----\n"
+GOOGLE_DRIVE_FOLDER_ID=your_folder_id_here
 ```
 
-4. **Firestore Veritabanı Yapısı**
+**Not:** `GOOGLE_PRIVATE_KEY` değerinde `\n` karakterlerini koruyun. Private key'i JSON'dan kopyalarken tüm satırları dahil edin.
+
+6. **Firestore Veritabanı Yapısı**
 
 Firestore'da aşağıdaki koleksiyonları oluşturun:
 
@@ -76,7 +89,7 @@ Her hizmet için:
 - `features` (array, optional): Hizmet özellikleri listesi
 - `createdAt` (timestamp): Oluşturulma tarihi
 
-5. **Geliştirme sunucusunu başlatın**
+7. **Geliştirme sunucusunu başlatın**
 
 ```bash
 npm run dev
@@ -104,6 +117,8 @@ Veya GitHub üzerinden otomatik deploy için:
 3. **Environment Variables**
 
 Vercel dashboard'da aşağıdaki environment variables'ları ekleyin:
+
+**Firebase:**
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
 - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
@@ -111,25 +126,48 @@ Vercel dashboard'da aşağıdaki environment variables'ları ekleyin:
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
 - `NEXT_PUBLIC_FIREBASE_APP_ID`
 
-4. **Firestore Güvenlik Kuralları**
+**Google Drive:**
+- `GOOGLE_SERVICE_ACCOUNT_EMAIL`
+- `GOOGLE_PRIVATE_KEY` (tüm satırları dahil edin, `\n` karakterlerini koruyun)
+- `GOOGLE_DRIVE_FOLDER_ID`
 
-Firestore'da aşağıdaki güvenlik kurallarını ayarlayın (sadece okuma için):
+4. **Firebase Authentication Kurulumu**
+
+- Firebase Console'da Authentication'ı etkinleştirin
+- Email/Password provider'ı açın
+- Admin kullanıcısı oluşturun (email: admin@emirtuning.com veya istediğiniz email)
+- `lib/auth.ts` dosyasındaki `ADMIN_EMAILS` listesine admin email'lerinizi ekleyin
+
+5. **Firestore Güvenlik Kuralları** ⚠️ **ZORUNLU**
+
+Firebase Console'da Firestore Database → Rules sekmesine gidin ve aşağıdaki kuralları yapıştırın:
 
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Herkes okuyabilir, sadece admin yazabilir
     match /products/{document=**} {
       allow read: if true;
-      allow write: if false; // Sadece admin panelinden eklenebilir
+      allow write: if false; // Admin panelinden yazılacak
     }
+    
     match /services/{document=**} {
       allow read: if true;
-      allow write: if false; // Sadece admin panelinden eklenebilir
+      allow write: if false; // Admin panelinden yazılacak
     }
   }
 }
 ```
+
+**Kuralları Uygulama:**
+1. Firebase Console: https://console.firebase.google.com/
+2. Projenizi seçin: `emir-tuning`
+3. **Firestore Database** → **Rules** sekmesine gidin
+4. Yukarıdaki kuralları yapıştırın
+5. **Publish** butonuna tıklayın
+
+**Not:** Bu kuralları uygulamadan "Missing or insufficient permissions" hatası alırsınız!
 
 ## 📁 Proje Yapısı
 
@@ -140,15 +178,24 @@ emir-tuning/
 │   ├── page.tsx           # Ana sayfa
 │   ├── urunler/           # Ürünler sayfası
 │   ├── hizmetler/         # Hizmetler sayfası
+│   ├── admin/             # Admin paneli
+│   │   ├── login/         # Admin giriş sayfası
+│   │   ├── page.tsx       # Admin dashboard
+│   │   └── urunler/       # Ürün yönetimi
 │   └── globals.css        # Global stiller
 ├── components/            # React bileşenleri
 │   ├── Navbar.tsx         # Navigasyon çubuğu
 │   ├── Footer.tsx         # Footer
 │   ├── ProductCard.tsx    # Ürün kartı
-│   └── ServiceCard.tsx    # Hizmet kartı
+│   ├── ServiceCard.tsx    # Hizmet kartı
+│   └── AdminRoute.tsx     # Admin route protection
 ├── lib/                   # Yardımcı fonksiyonlar
 │   ├── firebase.ts        # Firebase konfigürasyonu
-│   ├── firestore.ts       # Firestore işlemleri
+│   ├── firestore.ts       # Firestore okuma işlemleri
+│   ├── firestore-admin.ts # Firestore yazma işlemleri
+│   ├── auth.ts            # Authentication işlemleri
+│   ├── google-drive.ts    # Google Drive API
+│   ├── drive-client.ts    # Drive client helper
 │   └── types.ts           # TypeScript tipleri
 ├── public/                # Statik dosyalar
 └── package.json           # Proje bağımlılıkları
@@ -168,10 +215,29 @@ Renkleri değiştirmek için `tailwind.config.ts` dosyasındaki `primary` renk p
 
 ## 📝 Notlar
 
-- Fiyat bilgisi gösterilmemektedir (tasarım gereği)
 - Ürün ve hizmetler Firestore'dan dinamik olarak çekilmektedir
-- Görseller için Firebase Storage kullanılabilir
-- Sayfalar 60 saniyede bir otomatik olarak yenilenir (ISR)
+- Görseller Google Drive'dan çekilmektedir (`/api/drive/images` endpoint'i üzerinden)
+- Google Drive görselleri otomatik olarak public yapılır ve URL'leri alınır
+- Sayfalar client-side rendering kullanmaktadır
+- Admin paneli: `/admin` - Ürün ekleme, düzenleme, silme ve fiyat güncelleme
+- Admin girişi: `/admin/login` - Firebase Authentication ile giriş
+
+## 🔧 Google Drive API Kullanımı
+
+Görselleri Google Drive'dan çekmek için:
+
+```typescript
+import { fetchDriveImages } from '@/lib/drive-client'
+
+// Tüm görselleri çek
+const images = await fetchDriveImages()
+
+// Belirli bir görseli bul
+import { getImageByName } from '@/lib/drive-client'
+const image = await getImageByName('product-image.jpg')
+```
+
+API endpoint'i: `GET /api/drive/images`
 
 ## 🤝 Katkıda Bulunma
 
