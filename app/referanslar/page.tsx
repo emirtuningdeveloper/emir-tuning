@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Star, Quote } from 'lucide-react'
 import Image from 'next/image'
+import { getApprovedReviews } from '@/lib/firestore'
 
 interface Reference {
   id: string
@@ -20,70 +21,23 @@ export default function ReferanslarPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simüle edilmiş referans verileri
-    // Gerçek uygulamada bu veriler Firestore'dan çekilebilir
-    const mockReferences: Reference[] = [
-      {
-        id: '1',
-        customerName: 'Ahmet Yılmaz',
-        vehicleModel: 'BMW 3.20i',
-        service: 'Chip Tuning',
-        comment: 'Harika bir hizmet aldım. Aracımın performansı gözle görülür şekilde arttı. Profesyonel ekip ve kaliteli işçilik. Kesinlikle tavsiye ederim!',
-        rating: 5,
-        date: new Date('2024-01-15'),
-      },
-      {
-        id: '2',
-        customerName: 'Mehmet Demir',
-        vehicleModel: 'Mercedes C200',
-        service: 'Egzoz Sistemi',
-        comment: 'Egzoz sistemini değiştirdim. Hem ses hem de performans açısından mükemmel sonuç aldım. Çok memnun kaldım.',
-        rating: 5,
-        date: new Date('2024-02-20'),
-      },
-      {
-        id: '3',
-        customerName: 'Ayşe Kaya',
-        vehicleModel: 'Audi A3',
-        service: 'Body Kit',
-        comment: 'Aracıma body kit taktırdım. İşçilik kalitesi çok yüksek, aracımın görünümü tam istediğim gibi oldu. Teşekkürler!',
-        rating: 5,
-        date: new Date('2024-03-10'),
-      },
-      {
-        id: '4',
-        customerName: 'Can Özkan',
-        vehicleModel: 'Volkswagen Golf GTI',
-        service: 'Fren Sistemi',
-        comment: 'Fren sistemini yükselttim. Güvenlik ve performans açısından çok iyi bir yatırım oldu. Profesyonel yaklaşımları için teşekkürler.',
-        rating: 5,
-        date: new Date('2024-03-25'),
-      },
-      {
-        id: '5',
-        customerName: 'Zeynep Arslan',
-        vehicleModel: 'Ford Focus ST',
-        service: 'Radyatör ve Soğutma',
-        comment: 'Soğutma sistemini güçlendirdim. Özellikle sıcak havalarda çok fark ettim. Kaliteli ürün ve hizmet.',
-        rating: 4,
-        date: new Date('2024-04-05'),
-      },
-      {
-        id: '6',
-        customerName: 'Burak Şahin',
-        vehicleModel: 'Seat Leon Cupra',
-        service: 'Süspansiyon',
-        comment: 'Süspansiyon sistemini değiştirdim. Hem konfor hem de yol tutuşu açısından mükemmel. Çok memnunum.',
-        rating: 5,
-        date: new Date('2024-04-18'),
-      },
-    ]
-
-    // Simüle edilmiş loading
-    setTimeout(() => {
-      setReferences(mockReferences)
-      setLoading(false)
-    }, 500)
+    getApprovedReviews()
+      .then((reviews) => {
+        setReferences(
+          reviews.map((r) => ({
+            id: r.id,
+            customerName: r.customerName ?? '',
+            vehicleModel: r.vehicleModel ?? '',
+            service: r.service ?? '',
+            comment: r.comment ?? '',
+            rating: r.rating ?? 5,
+            imageUrl: r.imageUrl,
+            date: r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt),
+          }))
+        )
+      })
+      .catch(() => setReferences([]))
+      .finally(() => setLoading(false))
   }, [])
 
   const renderStars = (rating: number) => {

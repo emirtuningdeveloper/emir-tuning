@@ -74,6 +74,13 @@ export default function HizmetlerPage() {
     },
   ]
 
+  /** "Özel Proje" ile başlayan hizmeti her zaman listenin sonuna al */
+  const sortServicesWithOzelLast = (list: Service[]): Service[] => {
+    const ozel = list.filter((s) => s.name.startsWith('Özel Proje'))
+    const rest = list.filter((s) => !s.name.startsWith('Özel Proje'))
+    return [...rest, ...ozel]
+  }
+
   useEffect(() => {
     loadServices()
   }, [])
@@ -91,35 +98,35 @@ export default function HizmetlerPage() {
           if (data.success) {
             // Seed işlemi başarılı, tekrar yükle
             const newServices = await getServices()
-            setServices(newServices)
+            setServices(sortServicesWithOzelLast(newServices))
           } else {
             // Seed başarısız, default hizmetleri göster (geçici olarak)
-            setServices(defaultServices.map((s, i) => ({
+            setServices(sortServicesWithOzelLast(defaultServices.map((s, i) => ({
               ...s,
               id: `temp-${i}`,
               createdAt: new Date(),
-            })) as Service[])
+            })) as Service[]))
           }
         } catch (seedError) {
           console.error('Error seeding services:', seedError)
           // Seed başarısız, default hizmetleri göster (geçici olarak)
-          setServices(defaultServices.map((s, i) => ({
+          setServices(sortServicesWithOzelLast(defaultServices.map((s, i) => ({
             ...s,
             id: `temp-${i}`,
             createdAt: new Date(),
-          })) as Service[])
+          })) as Service[]))
         }
       } else {
-        setServices(servicesData)
+        setServices(sortServicesWithOzelLast(servicesData))
       }
     } catch (error) {
       console.error('Error loading services:', error)
       // Hata durumunda default hizmetleri göster
-      setServices(defaultServices.map((s, i) => ({
+      setServices(sortServicesWithOzelLast(defaultServices.map((s, i) => ({
         ...s,
         id: `temp-${i}`,
         createdAt: new Date(),
-      })) as Service[])
+      })) as Service[]))
     } finally {
       setLoading(false)
     }

@@ -6,14 +6,15 @@ Firebase Console'da Firestore Database → Rules sekmesine gidin ve aşağıdaki
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Giriş yapmış kullanıcılar (admin) yazabilir; herkes okuyabilir
     match /products/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth != null;
     }
     
     match /services/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth != null;
     }
     
     match /productSearchIndex/{document=**} {
@@ -64,4 +65,4 @@ service cloud.firestore {
 4. Yukarıdaki kuralları yapıştırın
 5. **Publish** butonuna tıklayın
 
-Bu kuralları uyguladıktan sonra "Missing or insufficient permissions" hatası çözülecektir.
+**Hizmetler / Referanslar kaydetme hatası:** `products` ve `services` koleksiyonları için `write: if request.auth != null` olmalı (giriş yapmış admin yazabilsin). Kuralları yukarıdaki gibi güncelleyip **Publish** ettikten sonra "Missing or insufficient permissions" hatası çözülür.

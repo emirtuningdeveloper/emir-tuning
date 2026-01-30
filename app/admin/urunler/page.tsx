@@ -24,6 +24,7 @@ export default function AdminUrunlerPage() {
   const [extUrl, setExtUrl] = useState('')
   const [extLabel, setExtLabel] = useState('')
   const [selectedSource, setSelectedSource] = useState<string>('all')
+  const [lastFetchCount, setLastFetchCount] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -126,8 +127,9 @@ export default function AdminUrunlerPage() {
     }
     try {
       setFetchingCategory(true)
+      setLastFetchCount(null)
       const res = await fetch(
-        `/api/products/by-category?categoryPath=${encodeURIComponent(selectedCategoryPath)}`
+        `/api/products/by-category?categoryPath=${encodeURIComponent(selectedCategoryPath)}&allPages=true`
       )
       const data = await res.json()
       if (!data.success) {
@@ -135,7 +137,9 @@ export default function AdminUrunlerPage() {
         return
       }
       const rawProducts = (data.products || []) as (Product & { source?: string })[]
+      const total = typeof data.totalCount === 'number' ? data.totalCount : rawProducts.length
       setProducts(rawProducts)
+      setLastFetchCount(total)
       loadStokStatus()
     } catch (e) {
       console.error('Fetch by category:', e)
@@ -521,24 +525,31 @@ export default function AdminUrunlerPage() {
                 })}
               </select>
             </div>
-            <button
-              type="button"
-              onClick={handleFetchByCategory}
-              disabled={!selectedCategoryPath || fetchingCategory}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {fetchingCategory ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Çekiliyor...
-                </>
-              ) : (
-                <>
-                  <Search className="w-4 h-4" />
-                  Kategoriden Ürün Çek
-                </>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                type="button"
+                onClick={handleFetchByCategory}
+                disabled={!selectedCategoryPath || fetchingCategory}
+                className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {fetchingCategory ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Çekiliyor...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4" />
+                    Kategoriden Ürün Çek
+                  </>
+                )}
+              </button>
+              {lastFetchCount !== null && (
+                <span className="text-sm font-medium text-gray-700 bg-gray-100 px-3 py-2 rounded-lg">
+                  Toplam <strong>{lastFetchCount}</strong> ürün çekildi
+                </span>
               )}
-            </button>
+            </div>
           </div>
 
           {/* Harici kategori kaynakları: Bu kategoriye başka siteden ürün çek */}
@@ -654,18 +665,23 @@ export default function AdminUrunlerPage() {
                       </td>
                     </tr>
                   ) : (
-                    displayedProducts.map((product) => (
-                      <tr key={product.id} className="group hover:bg-gray-50">
+                    displayedProducts.map((product) => {
+                      const isOutOfStock = outOfStockIds.has(product.id)
+                      return (
+                      <tr
+                        key={product.id}
+                        className={`group ${isOutOfStock ? 'bg-gray-100 text-gray-500' : 'hover:bg-gray-50'}`}
+                      >
                         <td className="px-6 py-4">
-                          <div className="font-medium text-gray-900 max-w-xs truncate" title={product.name}>{product.name}</div>
-                          <div className="text-sm text-gray-500 max-w-xs truncate">
+                          <div className={`font-medium max-w-xs truncate ${isOutOfStock ? 'text-gray-600' : 'text-gray-900'}`} title={product.name}>{product.name}</div>
+                          <div className={`text-sm max-w-xs truncate ${isOutOfStock ? 'text-gray-400' : 'text-gray-500'}`}>
                             {product.description ? product.description.substring(0, 50) + '...' : '-'}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-[200px] truncate" title={product.category}>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm max-w-[200px] truncate ${isOutOfStock ? 'text-gray-500' : 'text-gray-600'}`} title={product.category}>
                           {lastCategoryPart(product.category ?? '')}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${isOutOfStock ? 'text-gray-500' : 'text-gray-600'}`}>
                           {getProductSource(product)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -680,19 +696,14 @@ export default function AdminUrunlerPage() {
                           <label className="inline-flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
-                              checked={outOfStockIds.has(product.id)}
+                              checked={isOutOfStock}
                               onChange={() => handleToggleStok(product.id)}
                               className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                             />
-                            <span className="text-sm text-gray-700">Stok yok</span>
+                            <span className={`text-sm ${isOutOfStock ? 'text-gray-500' : 'text-gray-700'}`}>Stok yok</span>
                           </label>
-                          {outOfStockIds.has(product.id) && (
-                            <span className="ml-2 inline-block px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-                              Stok bitti
-                            </span>
-                          )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap sticky right-0 bg-white group-hover:bg-gray-50 shadow-[-4px_0_8px_rgba(0,0,0,0.06)] z-10">
+                        <td className={`px-6 py-4 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_rgba(0,0,0,0.06)] z-10 ${isOutOfStock ? 'bg-gray-100 group-hover:bg-gray-200' : 'bg-white group-hover:bg-gray-50'}`}>
                           <div className="flex gap-2 items-center">
                             <button
                               type="button"
@@ -715,7 +726,7 @@ export default function AdminUrunlerPage() {
                           </div>
                         </td>
                       </tr>
-                    ))
+                    ); })
                   )}
                 </tbody>
               </table>

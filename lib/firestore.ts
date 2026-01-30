@@ -126,12 +126,23 @@ export async function getApprovedReviews(limit?: number): Promise<Review[]> {
   try {
     const db = getDb()
     const reviewsRef = collection(db, 'reviews')
-    const q = query(
-      reviewsRef,
-      where('isApproved', '==', true),
-      orderBy('createdAt', 'desc')
-    )
-    const snapshot = await getDocs(q)
+    let snapshot
+    try {
+      const q = query(
+        reviewsRef,
+        where('isApproved', '==', true),
+        orderBy('createdAt', 'desc')
+      )
+      snapshot = await getDocs(q)
+    } catch (orderError: unknown) {
+      const err = orderError as { code?: string }
+      if (err?.code === 'failed-precondition') {
+        console.warn('Firestore reviews index missing, fetching all and filtering client-side')
+        snapshot = await getDocs(reviewsRef)
+      } else {
+        throw orderError
+      }
+    }
     
     let reviews = snapshot.docs.map(doc => {
       const data = doc.data()
@@ -142,6 +153,9 @@ export async function getApprovedReviews(limit?: number): Promise<Review[]> {
         updatedAt: data.updatedAt?.toDate(),
       } as Review
     })
+    
+    reviews = reviews.filter(r => r.isApproved === true)
+    reviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     
     if (limit) {
       reviews = reviews.slice(0, limit)

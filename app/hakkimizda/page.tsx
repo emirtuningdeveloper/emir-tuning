@@ -1,8 +1,24 @@
 'use client'
 
-import { Award, Users, Target, Heart } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Award, Users, Target, Heart, Loader2 } from 'lucide-react'
+import { getSiteSettings } from '@/lib/firestore'
+
+const DEFAULT_ABOUT = `Emir Tuning olarak, otomotiv tuning sektöründe yılların deneyimi ile müşterilerimize en kaliteli ürünleri ve profesyonel hizmetleri sunmaktan gurur duyuyoruz.
+
+2014 yılından beri faaliyet gösteren firmamız, başlangıçta küçük bir atölye olarak hizmet vermeye başladı. Zaman içinde müşteri memnuniyeti ve kalite odaklı yaklaşımımız sayesinde, sektörün önde gelen isimlerinden biri haline geldik.
+
+Bugün, geniş ürün yelpazemiz ve uzman ekibimizle, araç sahiplerinin hayallerindeki performans ve görünüme ulaşmalarına yardımcı oluyoruz. Her projede mükemmellik hedefliyor, müşterilerimizin güvenini kazanmak için çalışıyoruz.`
 
 export default function HakkimizdaPage() {
+  const [aboutText, setAboutText] = useState<string | null>(null)
+
+  useEffect(() => {
+    getSiteSettings()
+      .then((s) => setAboutText(s?.aboutPageText?.trim() || ''))
+      .catch(() => setAboutText(''))
+  }, [])
+
   const values = [
     {
       icon: Target,
@@ -49,29 +65,24 @@ export default function HakkimizdaPage() {
         </div>
       </section>
 
-      {/* Hikayemiz */}
+      {/* Hikayemiz (admin Ayarlar’dan düzenlenebilir) */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 text-center">
               Hikayemiz
             </h2>
-            <div className="prose prose-lg max-w-none text-gray-600 space-y-4">
-              <p>
-                Emir Tuning olarak, otomotiv tuning sektöründe yılların deneyimi ile müşterilerimize 
-                en kaliteli ürünleri ve profesyonel hizmetleri sunmaktan gurur duyuyoruz.
-              </p>
-              <p>
-                2014 yılından beri faaliyet gösteren firmamız, başlangıçta küçük bir atölye olarak 
-                hizmet vermeye başladı. Zaman içinde müşteri memnuniyeti ve kalite odaklı yaklaşımımız 
-                sayesinde, sektörün önde gelen isimlerinden biri haline geldik.
-              </p>
-              <p>
-                Bugün, geniş ürün yelpazemiz ve uzman ekibimizle, araç sahiplerinin hayallerindeki 
-                performans ve görünüme ulaşmalarına yardımcı oluyoruz. Her projede mükemmellik 
-                hedefliyor, müşterilerimizin güvenini kazanmak için çalışıyoruz.
-              </p>
-            </div>
+            {aboutText === null ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+              </div>
+            ) : (
+              <div className="prose prose-lg max-w-none text-gray-600 space-y-4">
+                {(aboutText || DEFAULT_ABOUT).split(/\n\n+/).map((para, i) => (
+                  <p key={i}>{para.trim()}</p>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -7,7 +7,6 @@ import { fetchDriveImages } from '@/lib/drive-client'
 import { fetchCarPartsProducts, getProxiedImageUrl, CarPartsProduct } from '@/lib/carparts-client'
 import ProductCard from '@/components/ProductCard'
 import { Product } from '@/lib/types'
-import { categories } from '@/lib/categories'
 import { productCategories } from '@/lib/product-categories'
 import { Loader2, ChevronRight, Package, Folder } from 'lucide-react'
 

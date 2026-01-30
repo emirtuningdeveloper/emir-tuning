@@ -2,6 +2,13 @@ import { collection, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocs
 import { getDb } from './firebase'
 import { Product, ProductOverride, CategoryUrlMapping, CategoryExternalSource, Service, Announcement, Review, SiteSettings, ProductSearchIndex, ApiConfig, ApiLog, ApiStats } from './types'
 
+/** Firestore undefined kabul etmez; objeden undefined alanları çıkar */
+function stripUndefined<T extends Record<string, unknown>>(obj: T): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined)
+  ) as Record<string, unknown>
+}
+
 /**
  * Ürün ekle
  */
@@ -11,7 +18,7 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
     const productsRef = collection(db, 'products')
     
     const docRef = await addDoc(productsRef, {
-      ...product,
+      ...stripUndefined(product as Record<string, unknown>),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -32,7 +39,7 @@ export async function updateProduct(productId: string, updates: Partial<Product>
     const productRef = doc(db, 'products', productId)
     
     await updateDoc(productRef, {
-      ...updates,
+      ...stripUndefined(updates as Record<string, unknown>),
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
@@ -350,7 +357,7 @@ export async function addService(service: Omit<Service, 'id' | 'createdAt'>): Pr
     const servicesRef = collection(db, 'services')
     
     const docRef = await addDoc(servicesRef, {
-      ...service,
+      ...stripUndefined(service as Record<string, unknown>),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -371,7 +378,7 @@ export async function updateService(serviceId: string, updates: Partial<Service>
     const serviceRef = doc(db, 'services', serviceId)
     
     await updateDoc(serviceRef, {
-      ...updates,
+      ...stripUndefined(updates as Record<string, unknown>),
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
@@ -405,7 +412,7 @@ export async function addAnnouncement(announcement: Omit<Announcement, 'id' | 'c
     const announcementsRef = collection(db, 'announcements')
     
     const docRef = await addDoc(announcementsRef, {
-      ...announcement,
+      ...stripUndefined(announcement as Record<string, unknown>),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -426,7 +433,7 @@ export async function updateAnnouncement(announcementId: string, updates: Partia
     const announcementRef = doc(db, 'announcements', announcementId)
     
     await updateDoc(announcementRef, {
-      ...updates,
+      ...stripUndefined(updates as Record<string, unknown>),
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
@@ -485,7 +492,7 @@ export async function addReview(review: Omit<Review, 'id' | 'createdAt'>): Promi
     const reviewsRef = collection(db, 'reviews')
     
     const docRef = await addDoc(reviewsRef, {
-      ...review,
+      ...stripUndefined(review as Record<string, unknown>),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -506,7 +513,7 @@ export async function updateReview(reviewId: string, updates: Partial<Review>): 
     const reviewRef = doc(db, 'reviews', reviewId)
     
     await updateDoc(reviewRef, {
-      ...updates,
+      ...stripUndefined(updates as Record<string, unknown>),
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
@@ -576,9 +583,12 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       const defaultSettings: Omit<SiteSettings, 'id' | 'updatedAt'> = {
         siteName: 'Emir Tuning',
         siteDescription: 'Otomotiv Tuning Dünyasında Profesyonel Çözümler',
+        logoUrl: '',
         contactEmail: '',
         contactPhone: '',
         address: '',
+        homepageText: '',
+        aboutPageText: '',
         socialMedia: {
           facebook: '',
           instagram: '',
@@ -616,11 +626,11 @@ export async function updateSiteSettings(settings: Omit<SiteSettings, 'id' | 'up
   try {
     const db = getDb()
     const settingsRef = doc(db, 'siteSettings', 'main')
-    
-    await setDoc(settingsRef, {
+    const flat: Record<string, unknown> = {
       ...settings,
       updatedAt: serverTimestamp(),
-    }, { merge: true })
+    }
+    await setDoc(settingsRef, stripUndefined(flat), { merge: true })
   } catch (error) {
     console.error('Error updating site settings:', error)
     throw error
