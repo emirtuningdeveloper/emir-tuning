@@ -102,7 +102,7 @@ export default function ReferanslarPage() {
               </div>
 
               <p className="text-gray-600 mb-4 leading-relaxed">
-                "{reference.comment}"
+                &quot;{reference.comment}&quot;
               </p>
 
               <div className="text-xs text-gray-400 border-t pt-4">

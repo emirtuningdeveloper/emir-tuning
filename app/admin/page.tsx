@@ -77,7 +77,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">Kategori URL Yönetimi</h2>
-                  <p className="text-sm text-gray-600">Kategori URL mapping'lerini yönet</p>
+                  <p className="text-sm text-gray-600">Kategori URL mapping&apos;lerini yönet</p>
                 </div>
               </div>
             </Link>
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">API Yönetimi</h2>
-                  <p className="text-sm text-gray-600">Harici API'leri yönet ve izle</p>
+                  <p className="text-sm text-gray-600">Harici API&apos;leri yönet ve izle</p>
                 </div>
               </div>
             </Link>

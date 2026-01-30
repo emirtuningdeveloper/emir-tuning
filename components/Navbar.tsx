@@ -98,7 +98,7 @@ export default function Navbar() {
   const handleSearchResultClick = (result: ProductSearchIndex) => {
     setSearchQuery('')
     setShowSearchResults(false)
-    router.push(`/urunler/${result.categoryPath}`)
+    router.push(`/urunler/${result.categoryPath || result.category || ''}`)
   }
 
   // Ürünler dropdown menüsü için kategorileri hazırla
@@ -193,7 +193,7 @@ export default function Navbar() {
                               {result.productName}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {result.categoryLabel}
+                              {result.categoryLabel || result.category}
                             </p>
                           </button>
                         ))}

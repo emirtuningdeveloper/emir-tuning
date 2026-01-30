@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         { status: 200 }
       )
     }
-    await upsertProductOverride(productId.trim(), { outOfStock })
+    await upsertProductOverride(productId.trim(), { productId: productId.trim(), outOfStock })
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('POST overrides error:', err)

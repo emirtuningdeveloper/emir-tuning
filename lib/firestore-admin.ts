@@ -819,9 +819,9 @@ export async function searchProductIndex(searchQuery: string, limit: number = 20
       })
       .filter(index => {
         // Her kelime için kontrol et
-        const productNameLower = index.productName.toLowerCase()
-        const keywordsLower = index.searchKeywords.map(k => k.toLowerCase()).join(' ')
-        const categoryLower = index.categoryLabel.toLowerCase()
+        const productNameLower = (index.productName || index.name || '').toLowerCase()
+        const keywordsLower = (index.searchKeywords || index.searchTerms || []).map((k: string) => k.toLowerCase()).join(' ')
+        const categoryLower = (index.categoryLabel || index.category || '').toLowerCase()
         
         // Tüm kelimelerin eşleşmesi gerekiyor (AND mantığı)
         return queryWords.every(word => 
@@ -854,9 +854,10 @@ export async function getApiConfig(apiName: string): Promise<ApiConfig | null> {
       const data = configDoc.data()
       return {
         id: configDoc.id,
+        apiName: data?.apiName ?? apiName,
         ...data,
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
+        createdAt: data?.createdAt?.toDate() || new Date(),
+        updatedAt: data?.updatedAt?.toDate() || new Date(),
       } as ApiConfig
     }
     
@@ -899,9 +900,10 @@ export async function getAllApiConfigs(): Promise<ApiConfig[]> {
       const data = doc.data()
       return {
         id: doc.id,
+        apiName: data?.apiName ?? doc.id,
         ...data,
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
+        createdAt: data?.createdAt?.toDate() || new Date(),
+        updatedAt: data?.updatedAt?.toDate() || new Date(),
       } as ApiConfig
     })
   } catch (error) {

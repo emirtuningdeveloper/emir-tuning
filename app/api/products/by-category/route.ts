@@ -38,7 +38,7 @@ function toAbsoluteImageUrl(url: string): string {
   return `${DRS_BASE}${u.startsWith('/') ? '' : '/'}${u}`
 }
 
-function pickProductImageUrl($imgs: cheerio.Cheerio<cheerio.Element>): string {
+function pickProductImageUrl($imgs: cheerio.Cheerio): string {
   const candidates: { url: string; score: number }[] = []
   const attrs = ['data-src', 'data-original', 'data-lazy-src', 'data-zoom-image', 'data-srcset', 'src']
 

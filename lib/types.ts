@@ -52,6 +52,7 @@ export interface CategoryExternalSource {
 export interface Review {
   id: string
   customerName: string
+  customerEmail?: string
   vehicleModel?: string
   service?: string
   comment: string
@@ -117,8 +118,15 @@ export interface ProductSearchIndex {
   id?: string
   productId: string
   name: string
+  /** Ürün adı (arama index'inde productName olarak da kullanılır) */
+  productName?: string
   category?: string
+  /** Kategori slug (URL için, örn. body-kit-setler) */
+  categoryPath?: string
+  /** Kategori etiketi (görüntüleme için) */
+  categoryLabel?: string
   searchTerms?: string[]
+  searchKeywords?: string[]
   createdAt?: Date
   updatedAt?: Date
 }
@@ -136,8 +144,15 @@ export interface ApiConfig {
 export interface ApiLog {
   id?: string
   apiName: string
+  path?: string
   method?: string
   status?: number
+  statusCode?: number
+  duration?: number
+  success?: boolean
+  error?: string
+  metadata?: Record<string, unknown>
+  timestamp?: Date
   createdAt?: Date
 }
 
@@ -146,5 +161,12 @@ export interface ApiStats {
   id?: string
   apiName: string
   requestCount?: number
+  totalRequests?: number
+  successfulRequests?: number
+  failedRequests?: number
+  averageResponseTime?: number
   lastRequestAt?: Date
+  lastRequestTime?: Date
+  errorRate?: number
+  period?: { start: Date; end: Date } | 'hour' | 'day' | 'week' | 'month'
 }

@@ -61,7 +61,7 @@ export default function AdminUrunlerPage() {
       const res = await fetch('/api/admin/products/overrides')
       const data = await res.json()
       if (data.success && Array.isArray(data.overrides)) {
-        const ids = new Set(
+        const ids = new Set<string>(
           data.overrides.filter((o: { outOfStock?: boolean }) => o.outOfStock).map((o: { productId: string }) => o.productId)
         )
         setOutOfStockIds(ids)
