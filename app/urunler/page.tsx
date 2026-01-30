@@ -1,12 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { getProducts } from '@/lib/firestore'
 import { fetchDriveImages } from '@/lib/drive-client'
 import { fetchCarPartsProducts, getProxiedImageUrl, CarPartsProduct } from '@/lib/carparts-client'
 import ProductCard from '@/components/ProductCard'
 import { Product } from '@/lib/types'
-import { Loader2 } from 'lucide-react'
+import { categories } from '@/lib/categories'
+import { productCategories } from '@/lib/product-categories'
+import { Loader2, ChevronRight, Package, Folder } from 'lucide-react'
 
 export default function UrunlerPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -158,8 +161,23 @@ export default function UrunlerPage() {
           allProducts.splice(0, allProducts.length, ...updatedProducts)
         }
         
-        // 6. Aksesuarlar kategorisi için boş bir kategori ekle (UI'da gösterilecek)
-        // Şimdilik boş, gelecekte eklenebilir
+        // 6. Stok bitti bilgisini birleştir
+        try {
+          const stokRes = await fetch('/api/products/out-of-stock-ids')
+          const stokData = await stokRes.json()
+          if (stokData.success && Array.isArray(stokData.ids)) {
+            const idSet = new Set(stokData.ids)
+            for (let i = 0; i < allProducts.length; i++) {
+              const p = allProducts[i]
+              allProducts[i] = {
+                ...p,
+                outOfStock: idSet.has(p.id) || idSet.has(`drstuning_${p.id}`),
+              }
+            }
+          }
+        } catch (_) {
+          /* ignore */
+        }
         
         console.log('Total products:', allProducts.length)
         setProducts(allProducts)
@@ -222,6 +240,36 @@ export default function UrunlerPage() {
         </p>
       </div>
 
+      {/* Product Categories */}
+      <div className="mb-16">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+          Ürün Kategorileri
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {productCategories.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/urunler/${category.slug}`}
+              className="group bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-500 hover:shadow-lg transition-all duration-300"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <Folder className="w-5 h-5 text-primary-600 group-hover:text-primary-700" />
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600">
+                  {category.title}
+                </h3>
+              </div>
+              {category.children && category.children.length > 0 && (
+                <p className="text-sm text-gray-500 mt-2">
+                  {category.children.length} alt kategori
+                </p>
+              )}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 pt-12 mt-12">
+
       {products.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-gray-500 text-lg">
@@ -233,10 +281,15 @@ export default function UrunlerPage() {
           {/* Body Kits Kategorisi */}
           {productsByCategory['Body Kits'] && productsByCategory['Body Kits'].length > 0 && (
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 border-b-2 border-primary-500 pb-2">
-                Body Kits
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="flex items-center justify-between mb-8 border-b-2 border-primary-500 pb-2">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  Body Kits
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  {productsByCategory['Body Kits'].length} ürün gösteriliyor
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                 {productsByCategory['Body Kits'].map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -246,11 +299,18 @@ export default function UrunlerPage() {
           
           {/* Aksesuarlar Kategorisi (şimdilik boş) */}
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 border-b-2 border-primary-500 pb-2">
-              Aksesuarlar
-            </h2>
+            <div className="flex items-center justify-between mb-8 border-b-2 border-primary-500 pb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Aksesuarlar
+              </h2>
+              {productsByCategory['Aksesuarlar'] && productsByCategory['Aksesuarlar'].length > 0 && (
+                <p className="text-gray-600 text-sm">
+                  {productsByCategory['Aksesuarlar'].length} ürün gösteriliyor
+                </p>
+              )}
+            </div>
             {productsByCategory['Aksesuarlar'] && productsByCategory['Aksesuarlar'].length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                 {productsByCategory['Aksesuarlar'].map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -267,10 +327,17 @@ export default function UrunlerPage() {
             .filter(cat => cat !== 'Body Kits' && cat !== 'Aksesuarlar')
             .map((category) => (
               <div key={category}>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 border-b-2 border-primary-500 pb-2">
-                  {category}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="flex items-center justify-between mb-8 border-b-2 border-primary-500 pb-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    {category}
+                  </h2>
+                  {productsByCategory[category] && productsByCategory[category].length > 0 && (
+                    <p className="text-gray-600 text-sm">
+                      {productsByCategory[category].length} ürün gösteriliyor
+                    </p>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                   {productsByCategory[category].map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -279,6 +346,7 @@ export default function UrunlerPage() {
             ))}
         </div>
       )}
+      </div>
     </div>
   )
 }

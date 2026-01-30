@@ -6,6 +6,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  // Kategori yolu "Ana > Alt > Son" ise sadece son kısmı göster (örn. "Body Kit Setler")
+  const displayCategory =
+    product.category && product.category.includes(' > ')
+      ? product.category.split(' > ').pop()?.trim() || product.category
+      : product.category
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
       {product.imageUrl ? (
@@ -35,26 +41,31 @@ export default function ProductCard({ product }: ProductCardProps) {
       )}
       
       <div className="p-6">
-        <div className="mb-2">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className="inline-block bg-primary-100 text-primary-700 text-xs font-semibold px-2 py-1 rounded">
-            {product.category}
+            {displayCategory}
           </span>
+          {product.outOfStock && (
+            <span className="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">
+              Stok bitti
+            </span>
+          )}
         </div>
         
-        <h3 className="text-xl font-bold text-gray-900 mb-2">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">
           {product.name}
         </h3>
         
-        <p className="text-gray-600 mb-4 line-clamp-3">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
           {product.description}
         </p>
 
         {product.features && product.features.length > 0 && (
           <div className="border-t pt-4">
-            <h4 className="text-sm font-semibold text-gray-900 mb-2">Özellikler:</h4>
+            <h4 className="text-xs font-semibold text-gray-900 mb-2">Özellikler:</h4>
             <ul className="space-y-1">
               {product.features.slice(0, 3).map((feature, index) => (
-                <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
+                <li key={index} className="text-xs text-gray-600 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-primary-500 rounded-full"></span>
                   {feature}
                 </li>

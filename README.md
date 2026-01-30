@@ -156,6 +156,42 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false; // Admin panelinden yazılacak
     }
+    
+    // Ürün arama index'i - herkes okuyabilir, admin yazabilir
+    match /productSearchIndex/{document=**} {
+      allow read: if true;
+      allow write: if true; // Geliştirme için açık, production'da admin kontrolü eklenebilir
+    }
+    
+    // Product overrides - herkes okuyabilir, admin yazabilir
+    match /productOverrides/{document=**} {
+      allow read: if true;
+      allow write: if true; // Geliştirme için açık
+    }
+    
+    // Category URL mappings - herkes okuyabilir, admin yazabilir
+    match /categoryUrlMappings/{document=**} {
+      allow read: if true;
+      allow write: if true; // Geliştirme için açık
+    }
+    
+    // Announcements - herkes okuyabilir, admin yazabilir
+    match /announcements/{document=**} {
+      allow read: if true;
+      allow write: if true; // Geliştirme için açık
+    }
+    
+    // Reviews/References - herkes okuyabilir, admin yazabilir
+    match /reviews/{document=**} {
+      allow read: if true;
+      allow write: if true; // Geliştirme için açık
+    }
+    
+    // Site settings - herkes okuyabilir, admin yazabilir
+    match /siteSettings/{document=**} {
+      allow read: if true;
+      allow write: if true; // Geliştirme için açık
+    }
   }
 }
 ```

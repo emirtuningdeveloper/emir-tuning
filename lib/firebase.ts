@@ -17,23 +17,25 @@ let app: FirebaseApp | undefined
 let db: Firestore | undefined
 let auth: Auth | undefined
 
+// Initialize Firebase (works on both client and server)
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig)
+} else {
+  app = getApps()[0]
+}
+
+// Only initialize auth on client side
 if (typeof window !== 'undefined') {
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig)
-  } else {
-    app = getApps()[0]
-  }
-  db = getFirestore(app)
   auth = getAuth(app)
 }
+
+// Initialize Firestore (works on both client and server)
+db = getFirestore(app)
 
 export { db, auth }
 
 // Helper function to get db safely
 export function getDb(): Firestore {
-  if (typeof window === 'undefined') {
-    throw new Error('Firebase can only be used on the client side')
-  }
   if (!db) {
     if (!app) {
       app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)

@@ -10,6 +10,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Emir Tuning - Otomotiv Tuning Çözümleri',
   description: 'Profesyonel otomotiv tuning ürünleri ve hizmetleri',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({

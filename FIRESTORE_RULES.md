@@ -6,15 +6,49 @@ Firebase Console'da Firestore Database → Rules sekmesine gidin ve aşağıdaki
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Herkes okuyabilir, sadece admin yazabilir
     match /products/{document=**} {
       allow read: if true;
-      allow write: if false; // Admin panelinden yazılacak (Firebase Admin SDK veya authenticated user)
+      allow write: if false;
     }
     
     match /services/{document=**} {
       allow read: if true;
-      allow write: if false; // Admin panelinden yazılacak
+      allow write: if false;
+    }
+    
+    match /productSearchIndex/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /productOverrides/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /categoryUrlMappings/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /categoryExternalSources/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /announcements/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /reviews/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /siteSettings/{document=**} {
+      allow read: if true;
+      allow write: if true;
     }
   }
 }

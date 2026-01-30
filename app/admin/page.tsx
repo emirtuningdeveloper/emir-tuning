@@ -3,7 +3,7 @@
 import AdminRoute from '@/components/AdminRoute'
 import { useRouter } from 'next/navigation'
 import { logoutAdmin, getCurrentUser } from '@/lib/auth'
-import { Package, Settings, LogOut, Plus } from 'lucide-react'
+import { Package, Settings, LogOut, Plus, Link as LinkIcon, Wrench, Bell, MessageSquare, BarChart3, Network } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { User } from 'firebase/auth'
@@ -66,18 +66,117 @@ export default function AdminDashboard() {
               </div>
             </Link>
 
-            {/* Hizmet Yönetimi */}
-            <div className="bg-white rounded-lg shadow-md p-6 opacity-50 cursor-not-allowed">
+            {/* Kategori URL Yönetimi */}
+            <Link
+              href="/admin/kategori-urls"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <Settings className="w-6 h-6 text-gray-400" />
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <LinkIcon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-500">Hizmet Yönetimi</h2>
-                  <p className="text-sm text-gray-500">Yakında eklenecek</p>
+                  <h2 className="text-xl font-bold text-gray-900">Kategori URL Yönetimi</h2>
+                  <p className="text-sm text-gray-600">Kategori URL mapping'lerini yönet</p>
                 </div>
               </div>
-            </div>
+            </Link>
+
+            {/* Hizmet Yönetimi */}
+            <Link
+              href="/admin/hizmetler"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Wrench className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Hizmet Yönetimi</h2>
+                  <p className="text-sm text-gray-600">Hizmetleri görüntüle ve düzenle</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Duyurular */}
+            <Link
+              href="/admin/duyurular"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <Bell className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Duyurular</h2>
+                  <p className="text-sm text-gray-600">Duyuruları yönet ve yayınla</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Referanslar */}
+            <Link
+              href="/admin/referanslar"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Referanslar</h2>
+                  <p className="text-sm text-gray-600">Referansları görüntüle ve düzenle</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Analitik */}
+            <Link
+              href="/admin/analitik"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Analitik</h2>
+                  <p className="text-sm text-gray-600">Site trafiği ve SEO analizi</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* API Yönetimi */}
+            <Link
+              href="/admin/api-yonetimi"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                  <Network className="w-6 h-6 text-teal-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">API Yönetimi</h2>
+                  <p className="text-sm text-gray-600">Harici API'leri yönet ve izle</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Ayarlar */}
+            <Link
+              href="/admin/ayarlar"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Settings className="w-6 h-6 text-gray-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Ayarlar</h2>
+                  <p className="text-sm text-gray-600">Genel site ayarlarını yönet</p>
+                </div>
+              </div>
+            </Link>
           </div>
         </main>
       </div>

@@ -1,6 +1,6 @@
-import { collection, getDocs, query, orderBy, where } from 'firebase/firestore'
+import { collection, getDocs, query, orderBy, where, doc, getDoc } from 'firebase/firestore'
 import { getDb } from './firebase'
-import { Product, Service } from './types'
+import { Product, Service, Review, Announcement, SiteSettings } from './types'
 
 export async function getProducts(): Promise<Product[]> {
   try {
@@ -119,5 +119,115 @@ export async function getServicesByCategory(category: string): Promise<Service[]
   } catch (error) {
     console.error('Error fetching services by category:', error)
     return []
+  }
+}
+
+export async function getApprovedReviews(limit?: number): Promise<Review[]> {
+  try {
+    const db = getDb()
+    const reviewsRef = collection(db, 'reviews')
+    const q = query(
+      reviewsRef,
+      where('isApproved', '==', true),
+      orderBy('createdAt', 'desc')
+    )
+    const snapshot = await getDocs(q)
+    
+    let reviews = snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate(),
+      } as Review
+    })
+    
+    if (limit) {
+      reviews = reviews.slice(0, limit)
+    }
+    
+    return reviews
+  } catch (error) {
+    console.error('Error fetching reviews:', error)
+    return []
+  }
+}
+
+export async function getActiveAnnouncements(type?: 'banner' | 'popup'): Promise<Announcement[]> {
+  try {
+    const db = getDb()
+    const announcementsRef = collection(db, 'announcements')
+    let q
+    
+    if (type) {
+      q = query(
+        announcementsRef,
+        where('isActive', '==', true),
+        where('type', '==', type)
+      )
+    } else {
+      q = query(
+        announcementsRef,
+        where('isActive', '==', true)
+      )
+    }
+    
+    const snapshot = await getDocs(q)
+    const now = new Date()
+    
+    let announcements = snapshot.docs
+      .map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate(),
+          expiresAt: data.expiresAt?.toDate(),
+        } as Announcement
+      })
+      .filter(announcement => {
+        // ExpiresAt kontrolü
+        if (announcement.expiresAt && announcement.expiresAt < now) {
+          return false
+        }
+        return true
+      })
+    
+    // Priority'ye göre sırala (high > medium > low)
+    const priorityOrder = { high: 3, medium: 2, low: 1 }
+    announcements.sort((a, b) => {
+      const priorityDiff = (priorityOrder[b.priority || 'medium'] || 2) - (priorityOrder[a.priority || 'medium'] || 2)
+      if (priorityDiff !== 0) return priorityDiff
+      return b.createdAt.getTime() - a.createdAt.getTime()
+    })
+    
+    return announcements
+  } catch (error) {
+    console.error('Error fetching announcements:', error)
+    return []
+  }
+}
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+  try {
+    const db = getDb()
+    const settingsRef = doc(db, 'siteSettings', 'main')
+    const settingsDoc = await getDoc(settingsRef)
+    
+    if (settingsDoc.exists()) {
+      const data = settingsDoc.data()
+      return {
+        id: settingsDoc.id,
+        ...data,
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      } as SiteSettings
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error fetching site settings:', error)
+    return null
   }
 }
