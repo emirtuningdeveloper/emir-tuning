@@ -38,15 +38,4 @@ export async function fetchCarPartsProducts(
   }
 }
 
-export function getProxiedImageUrl(originalUrl: string): string {
-  // Görseli proxy üzerinden göster
-  if (!originalUrl) return ''
-  
-  // Eğer zaten proxy URL'i ise, direkt dön
-  if (originalUrl.includes('/api/carparts/image')) {
-    return originalUrl
-  }
-
-  // Proxy URL'i oluştur
-  return `/api/carparts/image?url=${encodeURIComponent(originalUrl)}`
-}
+export { getProxiedImageUrl } from './image-proxy'

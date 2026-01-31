@@ -5,6 +5,7 @@ import ServiceCard from '@/components/ServiceCard'
 import { Service } from '@/lib/types'
 import { getServices } from '@/lib/firestore'
 import { fetchDriveImages } from '@/lib/drive-client'
+import { getProxiedImageUrl } from '@/lib/image-proxy'
 
 export default function HizmetlerPage() {
   const [services, setServices] = useState<Service[]>([])
@@ -203,9 +204,7 @@ export default function HizmetlerPage() {
             }
 
             if (foundImage) {
-              // Proxy URL kullan
-              const proxiedUrl = `/api/carparts/image?url=${encodeURIComponent(foundImage.publicUrl)}`
-              return { ...service, imageUrl: proxiedUrl }
+              return { ...service, imageUrl: getProxiedImageUrl(foundImage.publicUrl) }
             }
 
             return service

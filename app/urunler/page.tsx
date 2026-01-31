@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getProducts } from '@/lib/firestore'
 import { fetchDriveImages } from '@/lib/drive-client'
-import { fetchCarPartsProducts, getProxiedImageUrl, CarPartsProduct } from '@/lib/carparts-client'
+import { fetchCarPartsProducts, CarPartsProduct } from '@/lib/carparts-client'
+import { getProxiedImageUrl } from '@/lib/image-proxy'
 import ProductCard from '@/components/ProductCard'
 import { Product } from '@/lib/types'
 import { productCategories } from '@/lib/product-categories'
@@ -92,7 +93,7 @@ export default function UrunlerPage() {
               name: 'Kırmızı BMW Tuning',
               description: 'Premium kırmızı renk seçeneği ile BMW araçlarınız için özel tuning çözümleri.',
               category: 'BMW Tuning',
-              imageUrl: kirmiziBmw.publicUrl,
+              imageUrl: getProxiedImageUrl(kirmiziBmw.publicUrl),
               createdAt: new Date(),
             })
           }
@@ -103,7 +104,7 @@ export default function UrunlerPage() {
               name: 'Turuncu BMW Tuning',
               description: 'Gösterişli turuncu renk seçeneği ile BMW araçlarınız için özel tuning çözümleri.',
               category: 'BMW Tuning',
-              imageUrl: turuncuBmw.publicUrl,
+              imageUrl: getProxiedImageUrl(turuncuBmw.publicUrl),
               createdAt: new Date(),
             })
           }
@@ -114,7 +115,7 @@ export default function UrunlerPage() {
               name: 'Sarı BMW Tuning',
               description: 'Dikkat çekici sarı renk seçeneği ile BMW araçlarınız için özel tuning çözümleri.',
               category: 'BMW Tuning',
-              imageUrl: sariBmw.publicUrl,
+              imageUrl: getProxiedImageUrl(sariBmw.publicUrl),
               createdAt: new Date(),
             })
           }
@@ -137,7 +138,7 @@ export default function UrunlerPage() {
             if (matchingImage) {
               return {
                 ...product,
-                imageUrl: matchingImage.publicUrl,
+                imageUrl: getProxiedImageUrl(matchingImage.publicUrl),
               }
             }
             

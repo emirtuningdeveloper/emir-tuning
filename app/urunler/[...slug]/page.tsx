@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { productCategories, getReadableCategoryPath } from '@/lib/product-categories'
+import { getProxiedImageUrl } from '@/lib/image-proxy'
 import { Loader2, Package, ChevronRight } from 'lucide-react'
 
 interface CategoryProduct {
@@ -176,7 +177,7 @@ export default function UrunlerCategoryPage() {
                   {product.imageUrl ? (
                     <>
                       <img
-                        src={product.imageUrl}
+                        src={getProxiedImageUrl(product.imageUrl)}
                         alt={product.name}
                         className={`w-full h-full object-contain transition-transform duration-300 origin-bottom ${isOutOfStock ? 'opacity-75' : 'group-hover:scale-[1.4]'}`}
                         onError={(e) => {
