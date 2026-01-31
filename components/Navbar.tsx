@@ -1,12 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, Search, X, Loader2 } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import { ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import NavbarLogo from './NavbarLogo'
 import { productCategories, Category } from '@/lib/product-categories'
-import { ProductSearchIndex } from '@/lib/types'
 
 interface SubMenuItem {
   href: string
@@ -21,16 +20,9 @@ interface NavItem {
 
 export default function Navbar() {
   const pathname = usePathname()
-  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [showProductsMenu, setShowProductsMenu] = useState(false)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<ProductSearchIndex[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [showSearchResults, setShowSearchResults] = useState(false)
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const searchResultsRef = useRef<HTMLDivElement>(null)
 
   // Menü açıldığında ilk kategoriyi seç
   useEffect(() => {
@@ -38,68 +30,6 @@ export default function Navbar() {
       setHoveredCategory(productCategories[0].slug)
     }
   }, [showProductsMenu, hoveredCategory])
-
-  // Arama fonksiyonu
-  const handleSearch = async (query: string) => {
-    if (!query || query.trim().length < 2) {
-      setSearchResults([])
-      setShowSearchResults(false)
-      return
-    }
-
-    setIsSearching(true)
-    try {
-      const response = await fetch(`/api/search-products?q=${encodeURIComponent(query)}&limit=10`)
-      const data = await response.json()
-      
-      if (data.success) {
-        setSearchResults(data.results || [])
-        setShowSearchResults(true)
-      } else {
-        setSearchResults([])
-        setShowSearchResults(false)
-      }
-    } catch (error) {
-      console.error('Search error:', error)
-      setSearchResults([])
-      setShowSearchResults(false)
-    } finally {
-      setIsSearching(false)
-    }
-  }
-
-  // Debounced search
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      handleSearch(searchQuery)
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery])
-
-  // Click outside to close search results
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchResultsRef.current &&
-        !searchResultsRef.current.contains(event.target as Node) &&
-        searchInputRef.current &&
-        !searchInputRef.current.contains(event.target as Node)
-      ) {
-        setShowSearchResults(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Arama sonucuna tıklandığında kategori sayfasına yönlendir
-  const handleSearchResultClick = (result: ProductSearchIndex) => {
-    setSearchQuery('')
-    setShowSearchResults(false)
-    router.push(`/urunler/${result.categoryPath || result.category || ''}`)
-  }
 
   // Ürünler dropdown menüsü için kategorileri hazırla
   const productSubmenu: SubMenuItem[] = productCategories.map((category) => ({
@@ -131,84 +61,6 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-4 items-center">
-            {/* Arama Kutusu */}
-            <div className="relative">
-              <div className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2 focus-within:bg-gray-700 focus-within:ring-2 focus-within:ring-primary-500 transition-all">
-                <Search className="w-4 h-4 text-gray-400" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Ürün ara..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => {
-                    if (searchResults.length > 0) {
-                      setShowSearchResults(true)
-                    }
-                  }}
-                  className="bg-transparent border-none outline-none text-sm w-48 focus:w-64 transition-all text-gray-200 placeholder:text-gray-500"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery('')
-                      setShowSearchResults(false)
-                    }}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-                {isSearching && (
-                  <Loader2 className="w-4 h-4 animate-spin text-primary-400" />
-                )}
-              </div>
-
-              {/* Arama Sonuçları */}
-              {showSearchResults && (searchResults.length > 0 || searchQuery.length >= 2) && (
-                <div
-                  ref={searchResultsRef}
-                  className="absolute top-full left-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-[200] max-h-96 overflow-y-auto"
-                >
-                  {isSearching ? (
-                    <div className="p-4 text-center text-gray-500">
-                      <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-                      <p className="text-sm">Aranıyor...</p>
-                    </div>
-                  ) : searchResults.length > 0 ? (
-                    <>
-                      <div className="p-2 border-b border-gray-200">
-                        <p className="text-xs text-gray-500 font-medium">
-                          {searchResults.length} sonuç bulundu
-                        </p>
-                      </div>
-                      <div className="py-2">
-                        {searchResults.map((result) => (
-                          <button
-                            key={result.id}
-                            onClick={() => handleSearchResultClick(result)}
-                            className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                          >
-                            <p className="text-sm font-semibold text-gray-900 mb-1">
-                              {result.productName}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {result.categoryLabel || result.category}
-                            </p>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  ) : searchQuery.length >= 2 ? (
-                    <div className="p-4 text-center text-gray-500">
-                      <p className="text-sm">Sonuç bulunamadı</p>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-            </div>
-
-            {/* Menü Öğeleri */}
             <div className="flex gap-6">
             {navItems.map((item) => {
               if (item.submenu) {
