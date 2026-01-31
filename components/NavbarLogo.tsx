@@ -1,68 +1,77 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Car } from 'lucide-react'
+import { getSiteSettings } from '@/lib/firestore'
+import { toDirectDriveImageUrl } from '@/lib/drive-logo-url'
 
 export default function NavbarLogo() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [logoVersion, setLogoVersion] = useState<number>(() => Date.now())
   const [loading, setLoading] = useState(true)
+  const mounted = useRef(true)
 
   useEffect(() => {
-    async function fetchLogo() {
+    mounted.current = true
+    async function loadLogo() {
       try {
-        console.log('Navbar: Fetching logo from Drive API...')
+        const settings = await getSiteSettings()
+        if (!mounted.current) return
+        const raw = settings?.logoUrl?.trim() ?? ''
+        const url = toDirectDriveImageUrl(raw)
+        if (url) {
+          console.log('Navbar: Using Firestore logoUrl')
+          setLogoUrl(url)
+          setLogoVersion(Date.now())
+          setLoading(false)
+          return
+        }
+        console.log('Navbar: Using Drive logo fallback')
         const response = await fetch('/api/drive/logo')
-        
+        if (!mounted.current) return
         if (!response.ok) {
           throw new Error(`Failed to fetch logo: ${response.status}`)
         }
-
         const data = await response.json()
-        console.log('Navbar: Logo API response:', data)
-        
-        if (data.found && data.logo && data.logo.publicUrl) {
-          console.log('Navbar: Setting logo URL:', data.logo.publicUrl)
+        if (!mounted.current) return
+        if (data?.found && data?.logo?.publicUrl) {
           setLogoUrl(data.logo.publicUrl)
-        } else {
-          console.warn('Navbar: Logo not found')
+          setLogoVersion(Date.now())
         }
       } catch (error) {
-        console.error('Navbar: Error fetching logo from Drive:', error)
+        if (mounted.current) {
+          console.error('Navbar: Error loading logo', error)
+        }
       } finally {
-        setLoading(false)
+        if (mounted.current) setLoading(false)
       }
     }
-
-    fetchLogo()
+    loadLogo()
+    return () => {
+      mounted.current = false
+    }
   }, [])
 
   if (logoUrl && !loading) {
-    // Proxy URL kullan (CORS sorunlarını önlemek için)
-    const proxiedUrl = `/api/carparts/image?url=${encodeURIComponent(logoUrl)}`
-    
+    const proxiedUrl = `/api/carparts/image?url=${encodeURIComponent(logoUrl)}&v=${logoVersion}`
+    const directUrl = `${logoUrl}${logoUrl.includes('?') ? '&' : '?'}v=${logoVersion}`
+
     return (
       <img
         src={proxiedUrl}
         alt="Emir Tuning Logo"
-        className="h-10 w-auto object-contain"
+        className="h-14 w-auto object-contain min-h-[2.5rem]"
         onError={(e) => {
-          // Eğer proxy çalışmazsa direkt URL'i dene
           const target = e.target as HTMLImageElement
-          if (target.src !== logoUrl) {
-            console.log('Trying direct URL for navbar logo')
-            target.src = logoUrl
+          if (target.src !== directUrl) {
+            target.src = directUrl
           } else {
-            console.error('Both proxy and direct URL failed for navbar logo')
             setLogoUrl(null)
           }
-        }}
-        onLoad={() => {
-          console.log('Navbar logo loaded successfully')
         }}
       />
     )
   }
 
-  // Fallback: Car icon
-  return <Car className="w-8 h-8" />
+  return <Car className="w-12 h-12 text-white" />
 }

@@ -121,10 +121,10 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-black shadow-lg sticky top-0 z-50 border-b border-gray-800">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-2 text-primary-600 hover:text-primary-700">
+          <Link href="/" className="flex items-center gap-2 text-white hover:text-gray-200 transition-colors">
             <NavbarLogo />
             <span className="text-xl font-bold">Emir Tuning</span>
           </Link>
@@ -133,8 +133,8 @@ export default function Navbar() {
           <div className="hidden md:flex gap-4 items-center">
             {/* Arama Kutusu */}
             <div className="relative">
-              <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary-500 transition-all">
-                <Search className="w-4 h-4 text-gray-500" />
+              <div className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2 focus-within:bg-gray-700 focus-within:ring-2 focus-within:ring-primary-500 transition-all">
+                <Search className="w-4 h-4 text-gray-400" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -146,7 +146,7 @@ export default function Navbar() {
                       setShowSearchResults(true)
                     }
                   }}
-                  className="bg-transparent border-none outline-none text-sm w-48 focus:w-64 transition-all"
+                  className="bg-transparent border-none outline-none text-sm w-48 focus:w-64 transition-all text-gray-200 placeholder:text-gray-500"
                 />
                 {searchQuery && (
                   <button
@@ -154,13 +154,13 @@ export default function Navbar() {
                       setSearchQuery('')
                       setShowSearchResults(false)
                     }}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-400 hover:text-white"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 )}
                 {isSearching && (
-                  <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                  <Loader2 className="w-4 h-4 animate-spin text-primary-400" />
                 )}
               </div>
 
@@ -223,8 +223,8 @@ export default function Navbar() {
                       href={item.href}
                       className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
                         pathname === item.href || pathname.startsWith('/urunler')
-                          ? 'text-primary-600 bg-primary-50'
-                          : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                          ? 'text-white bg-gray-800'
+                          : 'text-gray-300 hover:text-white hover:bg-gray-800'
                       }`}
                     >
                       <span>{item.label}</span>
@@ -361,8 +361,8 @@ export default function Navbar() {
                   href={item.href}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     pathname === item.href
-                      ? 'text-primary-600 bg-primary-50'
-                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                      ? 'text-white bg-gray-800'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   {item.label}
@@ -374,7 +374,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
+            className="md:hidden p-2 rounded-md text-gray-300 hover:bg-gray-800"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -398,12 +398,12 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t">
+          <div className="md:hidden py-4 border-t border-gray-800">
             {navItems.map((item) => {
               if (item.submenu) {
                 return (
                   <div key={item.href}>
-                    <div className="px-3 py-2 text-base font-medium text-gray-700">
+                    <div className="px-3 py-2 text-base font-medium text-gray-300">
                       {item.label}
                     </div>
                     {item.submenu.map((subItem) => (
@@ -413,8 +413,8 @@ export default function Navbar() {
                         onClick={() => setIsOpen(false)}
                         className={`block px-6 py-2 rounded-md text-sm ${
                           pathname === subItem.href
-                            ? 'text-primary-600 bg-primary-50'
-                            : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                            ? 'text-white bg-gray-800'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
                         }`}
                       >
                         {subItem.label}
@@ -431,8 +431,8 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className={`block px-3 py-2 rounded-md text-base font-medium ${
                     pathname === item.href
-                      ? 'text-primary-600 bg-primary-50'
-                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                      ? 'text-white bg-gray-800'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   {item.label}

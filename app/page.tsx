@@ -120,9 +120,9 @@ export default function Home() {
         {/* Overlay for better text readability - daha şeffaf */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary-900/50 via-primary-800/50 to-primary-900/50" />
 
-        {/* Logo - Sağ üst köşede */}
-        <div className="absolute top-8 right-8 md:top-12 md:right-12 lg:top-16 lg:right-16 z-30">
-          <div className="w-72 md:w-96 lg:w-[480px] xl:w-[576px] opacity-100">
+        {/* Logo - Sağ tarafta, sığacak boyutta */}
+        <div className="absolute top-4 right-4 md:top-6 md:right-8 lg:top-8 lg:right-12 xl:right-20 z-30">
+          <div className="w-[min(100%,220px)] md:w-[280px] lg:w-[340px] xl:w-[400px] opacity-100">
             <Logo />
           </div>
         </div>
@@ -157,6 +157,9 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* İnce siyah şerit - hero ile alt bölüm arasında */}
+        <div className="absolute bottom-0 left-0 right-0 h-[6px] bg-black z-20" aria-hidden="true" />
       </section>
 
       {/* Features Section */}

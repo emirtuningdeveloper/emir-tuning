@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { getSiteSettings, updateSiteSettings } from '@/lib/firestore-admin'
 import { SiteSettings } from '@/lib/types'
+import { toDirectDriveImageUrl } from '@/lib/drive-logo-url'
 import { ChevronLeft, Save, Loader2, Settings } from 'lucide-react'
 
 const defaultForm: Omit<SiteSettings, 'id' | 'updatedAt'> = {
@@ -83,15 +84,28 @@ export default function AdminAyarlarPage() {
   const handleSave = async () => {
     try {
       setSaving(true)
+      const rawLogo = form.logoUrl?.trim() ?? ''
+      const logoUrl = toDirectDriveImageUrl(rawLogo)
+      console.log('Admin ayarlar: Saving site settings (logoUrl =', rawLogo, '→', logoUrl, ')')
       await updateSiteSettings({
         ...form,
+        logoUrl,
         socialMedia: form.socialMedia ?? defaultForm.socialMedia,
         seoSettings: form.seoSettings ?? defaultForm.seoSettings,
       })
       alert('Ayarlar kaydedildi.')
-    } catch (e) {
-      console.error(e)
-      alert('Kaydetme hatası.')
+    } catch (e: unknown) {
+      const err = e as { code?: string; message?: string }
+      console.error('Admin ayarlar: Save failed', err)
+      const isPermissionDenied =
+        err?.code === 'permission-denied' ||
+        (typeof err?.message === 'string' && err.message.toLowerCase().includes('permission'))
+      if (isPermissionDenied) {
+        console.error('Firestore PERMISSION_DENIED: Site ayarları yazma yetkisi yok. Firebase Console → Firestore → Rules bölümünde siteSettings için write kuralını kontrol edin.')
+        alert('Kaydetme hatası: Yetki reddedildi (Firestore). Firebase Console → Firestore → Kurallar\'da siteSettings için yazma iznini kontrol edin.')
+      } else {
+        alert('Kaydetme hatası: ' + (err?.message ?? String(e)))
+      }
     } finally {
       setSaving(false)
     }
@@ -162,7 +176,7 @@ export default function AdminAyarlarPage() {
                       <div className="mt-2 p-3 bg-gray-50 rounded-lg border">
                         <p className="text-xs text-gray-500 mb-2">Önizleme:</p>
                         <img
-                          src={form.logoUrl!.trim()}
+                          src={toDirectDriveImageUrl(form.logoUrl!.trim())}
                           alt="Logo önizleme"
                           className="max-h-16 w-auto object-contain"
                           onError={(e) => {
