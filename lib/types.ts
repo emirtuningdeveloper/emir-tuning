@@ -38,6 +38,12 @@ export interface Category {
   children?: Category[]
 }
 
+/** Admin kategori yönetiminde kullanılan düz liste öğesi (path = slug/slug/..., title = görünen ad) */
+export interface ManagedCategoryItem {
+  path: string
+  title: string
+}
+
 /** Kategoriye eklenen harici site linki (başka siteden ürün çekmek için) */
 export interface CategoryExternalSource {
   id?: string
@@ -76,6 +82,14 @@ export interface Announcement {
   updatedAt?: Date
 }
 
+/** Hakkımızda sayfası - Değerlerimiz / Neden bizi seçmelisiniz öğesi (admin'den düzenlenebilir) */
+export interface AboutValueItem {
+  title: string
+  description: string
+  /** Lucide icon adı (örn. ShieldCheck, Target, Award) */
+  icon: string
+}
+
 /** Site genel ayarları */
 export interface SiteSettings {
   id?: string
@@ -85,10 +99,20 @@ export interface SiteSettings {
   logoUrl?: string
   contactEmail?: string
   contactPhone?: string
+  /** WhatsApp floating buton numarası (örn. +905451234567) */
+  whatsappPhone?: string
   address?: string
+  /** İletişim sayfasında gösterilecek çalışma saatleri metni */
+  workingHours?: string
+  /** Ürünler sayfası "En çok satanlar" slider'ında gösterilecek kategori yolları (örn. body-kit-urunleri/body-kit-setler) */
+  featuredSliderCategoryPaths?: string[]
   homepageText?: string
   /** Hakkımızda sayfası metni (admin’den düzenlenebilir) */
   aboutPageText?: string
+  /** Hakkımızda - Değerlerimiz (admin'den düzenlenebilir) */
+  aboutValues?: AboutValueItem[]
+  /** Hakkımızda - Neden bizi seçmelisiniz (admin'den düzenlenebilir) */
+  whyChooseUs?: AboutValueItem[]
   socialMedia?: {
     facebook?: string
     instagram?: string

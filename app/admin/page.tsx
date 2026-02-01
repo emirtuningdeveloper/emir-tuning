@@ -3,7 +3,7 @@
 import AdminRoute from '@/components/AdminRoute'
 import { useRouter } from 'next/navigation'
 import { logoutAdmin, getCurrentUser } from '@/lib/auth'
-import { Package, Settings, LogOut, Plus, Link as LinkIcon, Wrench, Bell, MessageSquare, BarChart3, Network } from 'lucide-react'
+import { Package, Settings, LogOut, Link as LinkIcon, Wrench, Bell, MessageSquare, BarChart3, Network, Phone, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { User } from 'firebase/auth'
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
               </div>
             </Link>
 
-            {/* Kategori URL Yönetimi */}
+            {/* Kategori Yönetimi */}
             <Link
               href="/admin/kategori-urls"
               className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
@@ -76,8 +76,8 @@ export default function AdminDashboard() {
                   <LinkIcon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Kategori URL Yönetimi</h2>
-                  <p className="text-sm text-gray-600">Kategori URL mapping&apos;lerini yönet</p>
+                  <h2 className="text-xl font-bold text-gray-900">Kategori Yönetimi</h2>
+                  <p className="text-sm text-gray-600">Kategorileri ekle, sil veya başlığı düzenle</p>
                 </div>
               </div>
             </Link>
@@ -158,6 +158,38 @@ export default function AdminDashboard() {
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">API Yönetimi</h2>
                   <p className="text-sm text-gray-600">Harici API&apos;leri yönet ve izle</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* İletişim */}
+            <Link
+              href="/admin/iletisim"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Phone className="w-6 h-6 text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">İletişim</h2>
+                  <p className="text-sm text-gray-600">İletişim bilgileri ve sosyal medya</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Hakkımızda */}
+            <Link
+              href="/admin/hakkimizda"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-slate-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Hakkımızda</h2>
+                  <p className="text-sm text-gray-600">Değerlerimiz ve Neden Bizi Seçmelisiniz</p>
                 </div>
               </div>
             </Link>

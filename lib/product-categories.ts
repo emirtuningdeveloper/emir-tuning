@@ -332,6 +332,84 @@ export const productCategories: Category[] = [
 
 export type { Category }
 
+/** Ağacı düz listeye çevirir (path = slug/slug/..., title) */
+export function flattenCategories(categories: Category[], pathPrefix = ''): { path: string; title: string }[] {
+  const result: { path: string; title: string }[] = []
+  for (const cat of categories) {
+    const path = pathPrefix ? `${pathPrefix}/${cat.slug}` : cat.slug
+    result.push({ path, title: cat.title })
+    if (cat.children && cat.children.length > 0) {
+      result.push(...flattenCategories(cat.children, path))
+    }
+  }
+  return result
+}
+
+/** Kategori path'ini URL slug formatına çevirir (başlık veya karışık format → dis-aksesuarlar/plastik-yan-kapi-citasi). Ürün kaydederken kullanılır. */
+export function categoryPathToSlug(path: string): string {
+  if (!path || typeof path !== 'string') return path
+  const trMap: Record<string, string> = {
+    ı: 'i', İ: 'i', I: 'i', Ğ: 'g', ğ: 'g', Ü: 'u', ü: 'u', Ş: 's', ş: 's', Ö: 'o', ö: 'o', Ç: 'c', ç: 'c',
+  }
+  const segments = path.split('/').map((s) => s.trim()).filter(Boolean)
+  const slugSegments = segments.map((seg) => {
+    let s = seg
+    for (const [tr, ascii] of Object.entries(trMap)) s = s.replace(new RegExp(tr, 'g'), ascii)
+    return s
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+  }).filter(Boolean)
+  return slugSegments.join('/')
+}
+
+/** Slug segmentini başlığa çevirir (body-kit-urunleri -> Body Kit Urunleri) */
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ')
+}
+
+type CategoryEntry = { node: Category; children: Map<string, CategoryEntry> }
+
+/** Düz listeyi Category ağacına çevirir */
+export function buildCategoriesFromFlat(items: { path: string; title: string }[]): Category[] {
+  if (!items || items.length === 0) return []
+  const root = new Map<string, CategoryEntry>()
+
+  for (const { path, title } of items) {
+    const segments = path.split('/').map((s) => s.trim()).filter(Boolean)
+    if (segments.length === 0) continue
+    let current = root
+    for (let i = 0; i < segments.length; i++) {
+      const slug = segments[i]
+      const isLeaf = i === segments.length - 1
+      if (!current.has(slug)) {
+        current.set(slug, {
+          node: { title: isLeaf ? title : slugToTitle(slug), slug, children: [] },
+          children: new Map(),
+        })
+      }
+      const entry = current.get(slug)!
+      if (isLeaf) entry.node.title = title
+      current = entry.children
+    }
+  }
+
+  function toArray(m: Map<string, CategoryEntry>): Category[] {
+    return Array.from(m.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, { node, children }]) => ({
+        ...node,
+        children: children.size > 0 ? toArray(children) : undefined,
+      }))
+  }
+  return toArray(root)
+}
+
 /** Tüm kategori path'lerini (slug zinciri) gruplu option listesine çevirir */
 export function getCategoryPathsGrouped(categories: Category[]): { group: string; options: { path: string; label: string }[] }[] {
   const result: { group: string; options: { path: string; label: string }[] }[] = []

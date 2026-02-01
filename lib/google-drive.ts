@@ -1,117 +1,67 @@
 import { google } from 'googleapis'
+import * as fs from 'fs'
+import * as path from 'path'
 
-// Google Drive API client oluştur
-export function getDriveClient() {
-  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-  let privateKey = process.env.GOOGLE_PRIVATE_KEY
+/** .env'den veya service-account.json'dan email + private key al (JSON öncelikli, JWT imza hatası önlenir) */
+function getGoogleCredentials(): { email: string; key: string } {
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
+  const jsonPath = path.join(process.cwd(), 'service-account.json')
 
-  if (!serviceAccountEmail || !privateKey) {
-    throw new Error('Google Drive credentials are not configured')
+  // 1) Önce service-account.json varsa onu kullan (private key formatı her zaman doğru)
+  if (fs.existsSync(jsonPath)) {
+    try {
+      const jsonContent = fs.readFileSync(jsonPath, 'utf8')
+      const json = JSON.parse(jsonContent)
+      const key = json.private_key
+      const em = email || json.client_email
+      if (em && key) {
+        return { email: em, key }
+      }
+    } catch (e) {
+      console.warn('service-account.json okunamadı, .env kullanılıyor:', (e as Error).message)
+    }
   }
 
-  // Private key'i düzgün formatla
-  privateKey = privateKey.trim()
-  
-  // Eğer tırnak içindeyse kaldır
+  // 2) .env'den oku
+  if (!email || !process.env.GOOGLE_PRIVATE_KEY) {
+    throw new Error('Google Drive credentials are not configured. Set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY in .env.local, or add service-account.json to the project root.')
+  }
+
+  let privateKey = process.env.GOOGLE_PRIVATE_KEY.trim()
   if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
     privateKey = privateKey.slice(1, -1)
   }
   if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
     privateKey = privateKey.slice(1, -1)
   }
-  
-  // Node.js environment variable'larında \n bazen literal string olarak gelir
-  // Tüm olası formatları dene - en güvenilir yöntem: split/join
-  
-  // 1. Önce \\n (double escaped) varsa onu çevir
-  privateKey = privateKey.replace(/\\\\n/g, '\n')
-  
-  // 2. Sonra \n (escaped) varsa onu çevir - bu en yaygın format
-  privateKey = privateKey.replace(/\\n/g, '\n')
-  
-  // 3. Eğer hala literal "\n" string'i varsa (backslash karakteri + n karakteri)
-  // Bu durumda split/join kullan - bu en güvenilir yöntem
+  privateKey = privateKey.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n')
   if (privateKey.includes('\\n')) {
-    // Tüm literal \n'leri gerçek newline'lara çevir
     privateKey = privateKey.split('\\n').join('\n')
   }
-  
-  // BEGIN ve END satırlarını kontrol et
-  if (!privateKey.includes('BEGIN PRIVATE KEY')) {
-    throw new Error('Invalid private key format: Missing BEGIN PRIVATE KEY marker')
+  if (!privateKey.includes('BEGIN PRIVATE KEY') || !privateKey.includes('END PRIVATE KEY')) {
+    throw new Error('Invalid private key format in .env. Use service-account.json for a reliable setup.')
   }
-  if (!privateKey.includes('END PRIVATE KEY')) {
-    throw new Error('Invalid private key format: Missing END PRIVATE KEY marker')
-  }
-  
-  // Private key'in başında ve sonunda gereksiz karakterleri temizle
-  // BEGIN'den önceki her şeyi kaldır
   const beginIndex = privateKey.indexOf('-----BEGIN PRIVATE KEY-----')
-  if (beginIndex > 0) {
-    privateKey = privateKey.substring(beginIndex)
-  }
-  
-  // END'den sonraki her şeyi kaldır
+  if (beginIndex > 0) privateKey = privateKey.substring(beginIndex)
   const endIndex = privateKey.indexOf('-----END PRIVATE KEY-----')
   if (endIndex > 0) {
     privateKey = privateKey.substring(0, endIndex + '-----END PRIVATE KEY-----'.length)
   }
-  
-  // Private key'in sonunda newline olmalı
-  if (!privateKey.endsWith('\n')) {
-    privateKey = privateKey + '\n'
-  }
-  
-  // BEGIN satırının başında newline olmamalı (PEM formatı)
-  if (privateKey.startsWith('\n-----BEGIN')) {
-    privateKey = privateKey.substring(1)
-  }
+  if (!privateKey.endsWith('\n')) privateKey = privateKey + '\n'
+  if (privateKey.startsWith('\n-----BEGIN')) privateKey = privateKey.substring(1)
 
-  try {
-    const auth = new google.auth.JWT({
-      email: serviceAccountEmail,
-      key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/drive.readonly'],
-    })
+  return { email, key: privateKey }
+}
 
-    return google.drive({ version: 'v3', auth })
-  } catch (error: any) {
-    console.error('JWT Auth Error:', error.message)
-    console.error('Error code:', error.code)
-    
-    // DECODER hatası durumunda JSON dosyasından private key'i dene
-    if (error.message.includes('DECODER') || error.code === 'ERR_OSSL_UNSUPPORTED') {
-      try {
-        const fs = require('fs')
-        const path = require('path')
-        // JSON dosyasını proje klasöründe ara
-        const jsonPath = path.join(process.cwd(), 'service-account.json')
-        
-        if (fs.existsSync(jsonPath)) {
-          console.log('Trying to use private key from JSON file...')
-          const jsonContent = fs.readFileSync(jsonPath, 'utf8')
-          const json = JSON.parse(jsonContent)
-          const jsonPrivateKey = json.private_key
-          
-          // JSON'daki private key'i dene (bu zaten doğru formatta)
-          const authFromJson = new google.auth.JWT({
-            email: serviceAccountEmail,
-            key: jsonPrivateKey,
-            scopes: ['https://www.googleapis.com/auth/drive.readonly'],
-          })
-          
-          console.log('Successfully using private key from JSON file')
-          return google.drive({ version: 'v3', auth: authFromJson })
-        }
-      } catch (jsonError: any) {
-        console.error('Failed to use JSON file:', jsonError.message)
-      }
-      
-      throw new Error(`Private key decode error. Tried both .env.local and JSON file.
-Error: ${error.message}`)
-    }
-    throw new Error(`Failed to create Drive client: ${error.message}`)
-  }
+// Google Drive API client oluştur
+export function getDriveClient() {
+  const { email, key } = getGoogleCredentials()
+  const auth = new google.auth.JWT({
+    email,
+    key,
+    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+  })
+  return google.drive({ version: 'v3', auth })
 }
 
 export interface DriveFile {
@@ -186,9 +136,8 @@ export async function getFilePublicUrl(fileId: string): Promise<string> {
           },
         })
       }
-    } catch (permError: any) {
-      // İzin hatası olsa bile devam et
-      console.warn('Permission error (may already be public):', permError.message)
+    } catch {
+      // İzin hatası olsa bile devam et (dosya zaten public olabilir)
     }
 
     // Dosya bilgilerini al
@@ -223,8 +172,7 @@ export async function getFilePublicUrl(fileId: string): Promise<string> {
 
     // 3. Fallback: Google Drive viewer URL (bu format genellikle çalışır)
     return `https://drive.google.com/uc?export=view&id=${fileId}`
-  } catch (error: any) {
-    console.error('Error getting file public URL:', error)
+  } catch {
     // Fallback URL - bu format genellikle çalışır
     return `https://drive.google.com/uc?export=view&id=${fileId}`
   }
@@ -236,21 +184,12 @@ export async function getFilePublicUrl(fileId: string): Promise<string> {
 export async function getImagesWithUrls(folderId: string): Promise<Array<DriveFile & { publicUrl: string }>> {
   try {
     const images = await getImagesFromFolder(folderId)
-    console.log(`Found ${images.length} images in Drive folder`)
-    
     const imagesWithUrls = await Promise.all(
-      images.map(async (image, index) => {
+      images.map(async (image) => {
         try {
-          console.log(`Processing image ${index + 1}/${images.length}: ${image.name}`)
           const publicUrl = await getFilePublicUrl(image.id)
-          console.log(`Got URL for ${image.name}: ${publicUrl.substring(0, 100)}...`)
-          return {
-            ...image,
-            publicUrl,
-          }
-        } catch (urlError: any) {
-          console.error(`Error getting URL for ${image.name}:`, urlError.message)
-          // Fallback URL kullan
+          return { ...image, publicUrl }
+        } catch {
           return {
             ...image,
             publicUrl: `https://drive.google.com/uc?export=view&id=${image.id}`,
@@ -258,8 +197,6 @@ export async function getImagesWithUrls(folderId: string): Promise<Array<DriveFi
         }
       })
     )
-    
-    console.log(`Successfully processed ${imagesWithUrls.length} images`)
     return imagesWithUrls
   } catch (error) {
     console.error('Error getting images with URLs:', error)

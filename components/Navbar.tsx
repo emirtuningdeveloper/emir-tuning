@@ -23,16 +23,28 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [showProductsMenu, setShowProductsMenu] = useState(false)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+  const [categories, setCategories] = useState<Category[]>(productCategories)
+
+  useEffect(() => {
+    fetch('/api/categories', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setCategories(data)
+      })
+      .catch(() => {})
+  }, [])
+
+  const productCategoriesList = categories
 
   // Menü açıldığında ilk kategoriyi seç
   useEffect(() => {
-    if (showProductsMenu && !hoveredCategory && productCategories.length > 0) {
-      setHoveredCategory(productCategories[0].slug)
+    if (showProductsMenu && !hoveredCategory && productCategoriesList.length > 0) {
+      setHoveredCategory(productCategoriesList[0].slug)
     }
-  }, [showProductsMenu, hoveredCategory])
+  }, [showProductsMenu, hoveredCategory, productCategoriesList])
 
   // Ürünler dropdown menüsü için kategorileri hazırla
-  const productSubmenu: SubMenuItem[] = productCategories.map((category) => ({
+  const productSubmenu: SubMenuItem[] = productCategoriesList.map((category) => ({
     href: `/urunler/${category.slug}`,
     label: category.title,
   }))
@@ -51,17 +63,16 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="bg-black shadow-lg sticky top-0 z-50 border-b border-gray-800">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-2 text-white hover:text-gray-200 transition-colors">
+    <nav className="sticky top-0 z-50 bg-anthracite-900/95 backdrop-blur-md border-b border-white/5 shadow-nav">
+      <div className="container mx-auto px-4 max-w-content">
+        <div className="flex justify-between items-center h-[4.25rem]">
+          <Link href="/" className="flex items-center text-white hover:text-white/90 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-anthracite-900 rounded">
             <NavbarLogo />
-            <span className="text-xl font-bold">Emir Tuning</span>
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex gap-4 items-center">
-            <div className="flex gap-6">
+          <div className="hidden md:flex gap-1 items-center">
+            <div className="flex gap-1 items-center">
             {navItems.map((item) => {
               if (item.submenu) {
                 return (
@@ -73,79 +84,78 @@ export default function Navbar() {
                   >
                     <Link
                       href={item.href}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+                      className={`px-4 py-2.5 rounded-button text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
                         pathname === item.href || pathname.startsWith('/urunler')
-                          ? 'text-white bg-gray-800'
-                          : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                          ? 'text-white bg-white/10'
+                          : 'text-gray-300 hover:text-white hover:bg-white/5'
                       }`}
                     >
                       <span>{item.label}</span>
                       <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showProductsMenu ? 'rotate-180' : ''}`} />
                     </Link>
                     
-                    {/* Mega Menu - Boşluğu kapatmak için biraz yukarı alıyoruz */}
+                    {/* Mega Menu */}
                     {showProductsMenu && (
                       <div 
-                        className="absolute top-[calc(100%-4px)] left-0 bg-white rounded-md shadow-xl border border-gray-200 z-[100]"
+                        className="absolute top-full left-0 pt-1 z-[100]"
                         onMouseEnter={() => setShowProductsMenu(true)}
                         onMouseLeave={() => {
                           setShowProductsMenu(false)
                           setHoveredCategory(null)
                         }}
-                        style={{ width: '1000px', maxHeight: '85vh' }}
                       >
-                        <div className="flex h-full">
-                          {/* Sol taraf - Ana kategoriler */}
-                          <div className="w-56 border-r border-gray-200 bg-gray-50">
-                            <div className="px-4 py-3 bg-primary-600">
-                              <h3 className="text-sm font-semibold text-white">Kategoriler</h3>
-                            </div>
-                            <div className="overflow-y-auto" style={{ maxHeight: 'calc(85vh - 60px)' }}>
-                              {productCategories.map((category) => (
-                                <div
-                                  key={category.slug}
-                                  onMouseEnter={() => setHoveredCategory(category.slug)}
-                                  className={`px-4 py-3 text-sm transition-all cursor-pointer border-l-2 ${
-                                    hoveredCategory === category.slug
-                                      ? 'bg-white text-primary-600 font-semibold border-primary-600'
-                                      : pathname === `/urunler/${category.slug}` || pathname.startsWith(`/urunler/${category.slug}/`)
-                                      ? 'bg-white text-primary-600 border-primary-400'
-                                      : 'text-gray-700 hover:bg-white hover:text-primary-600 border-transparent'
-                                  }`}
-                                >
-                                  <Link 
-                                    href={`/urunler/${category.slug}`}
-                                    onClick={() => setShowProductsMenu(false)}
-                                    className="block"
+                        <div 
+                          className="bg-white rounded-card-lg shadow-dropdown border border-gray-100 overflow-hidden"
+                          style={{ width: '1000px', maxHeight: '85vh' }}
+                        >
+                          <div className="flex h-full">
+                            {/* Sol - Ana kategoriler */}
+                            <div className="w-56 border-r border-gray-100 bg-gray-50/80">
+                              <div className="px-4 py-3 bg-anthracite-900">
+                                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-300">Kategoriler</h3>
+                              </div>
+                              <div className="overflow-y-auto" style={{ maxHeight: 'calc(85vh - 52px)' }}>
+                                {productCategoriesList.map((category) => (
+                                  <div
+                                    key={category.slug}
+                                    onMouseEnter={() => setHoveredCategory(category.slug)}
+                                    className={`px-4 py-2.5 text-sm transition-colors duration-150 cursor-pointer border-l-2 ${
+                                      hoveredCategory === category.slug
+                                        ? 'bg-white text-primary-600 font-semibold border-primary-600'
+                                        : pathname === `/urunler/${category.slug}` || pathname.startsWith(`/urunler/${category.slug}/`)
+                                        ? 'bg-white text-primary-600 border-primary-500'
+                                        : 'text-gray-700 hover:bg-white hover:text-primary-600 border-transparent'
+                                    }`}
                                   >
-                                    {category.title}
-                                  </Link>
-                                </div>
-                              ))}
+                                    <Link 
+                                      href={`/urunler/${category.slug}`}
+                                      onClick={() => setShowProductsMenu(false)}
+                                      className="block"
+                                    >
+                                      {category.title}
+                                    </Link>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
 
-                          {/* Sağ taraf - Alt kategoriler */}
-                          {hoveredCategory && (() => {
-                            const selectedCategory = productCategories.find(cat => cat.slug === hoveredCategory)
-                            // Alt kategorisi olmayan kategoriler için sağ paneli gösterme
-                            if (!selectedCategory || !selectedCategory.children || selectedCategory.children.length === 0) {
-                              return null
-                            }
-                            
-                            // Alt kategorileri sütunlara böl (3 sütun)
-                            const columns: Category[][] = [[], [], []]
-                            selectedCategory.children.forEach((child, index) => {
-                              columns[index % 3].push(child)
-                            })
+                            {/* Sağ - Alt kategoriler */}
+                            {hoveredCategory && (() => {
+                              const selectedCategory = productCategoriesList.find(cat => cat.slug === hoveredCategory)
+                              if (!selectedCategory || !selectedCategory.children || selectedCategory.children.length === 0) {
+                                return null
+                              }
+                              const columns: Category[][] = [[], [], []]
+                              selectedCategory.children.forEach((child, index) => {
+                                columns[index % 3].push(child)
+                              })
 
-                            return (
-                              <div className="flex-1 px-6 py-4 overflow-y-auto" style={{ maxHeight: '85vh' }}>
-                                <div>
-                                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                              return (
+                                <div className="flex-1 px-6 py-5 overflow-y-auto" style={{ maxHeight: '85vh' }}>
+                                  <h4 className="text-base font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 tracking-tight">
                                     {selectedCategory.title}
                                   </h4>
-                                  <div className="grid grid-cols-3 gap-8">
+                                  <div className="grid grid-cols-3 gap-x-10 gap-y-1">
                                     {columns.map((column, colIndex) => (
                                       <div key={colIndex} className="space-y-0">
                                         {column.map((subCategory) => (
@@ -153,17 +163,15 @@ export default function Navbar() {
                                             <Link
                                               href={`/urunler/${selectedCategory.slug}/${subCategory.slug}`}
                                               onClick={() => setShowProductsMenu(false)}
-                                              className={`block py-1.5 text-sm font-semibold transition-colors mb-1 ${
+                                              className={`block py-1.5 text-sm font-medium transition-colors duration-150 ${
                                                 pathname === `/urunler/${selectedCategory.slug}/${subCategory.slug}` || 
                                                 pathname.startsWith(`/urunler/${selectedCategory.slug}/${subCategory.slug}/`)
                                                   ? 'text-primary-600'
-                                                  : 'text-gray-900 hover:text-primary-600'
+                                                  : 'text-gray-800 hover:text-primary-600'
                                               }`}
                                             >
                                               {subCategory.title}
                                             </Link>
-                                            
-                                            {/* Alt-alt kategoriler (3. seviye) */}
                                             {subCategory.children && subCategory.children.length > 0 && (
                                               <div className="ml-0 mt-1 space-y-0.5">
                                                 {subCategory.children.map((subSubCategory) => (
@@ -171,7 +179,7 @@ export default function Navbar() {
                                                     key={subSubCategory.slug}
                                                     href={`/urunler/${selectedCategory.slug}/${subCategory.slug}/${subSubCategory.slug}`}
                                                     onClick={() => setShowProductsMenu(false)}
-                                                    className={`block py-1 text-xs transition-colors pl-2 ${
+                                                    className={`block py-1 text-xs transition-colors duration-150 pl-2 ${
                                                       pathname === `/urunler/${selectedCategory.slug}/${subCategory.slug}/${subSubCategory.slug}` ||
                                                       pathname.startsWith(`/urunler/${selectedCategory.slug}/${subCategory.slug}/${subSubCategory.slug}/`)
                                                         ? 'text-primary-600 font-medium'
@@ -189,17 +197,15 @@ export default function Navbar() {
                                     ))}
                                   </div>
                                 </div>
+                              )
+                            })()}
+                            
+                            {!hoveredCategory && (
+                              <div className="flex-1 px-6 py-5 flex items-center justify-center" style={{ maxHeight: '85vh' }}>
+                                <p className="text-sm text-gray-400">Bir kategori seçin</p>
                               </div>
-                            )
-                          })()}
-                          
-                          {!hoveredCategory && (
-                            <div className="flex-1 px-6 py-4 overflow-y-auto" style={{ maxHeight: '85vh' }}>
-                              <div className="text-center py-12 text-gray-400">
-                                <p className="text-sm">Bir kategori seçin</p>
-                              </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -211,11 +217,11 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-2.5 rounded-button text-sm font-medium transition-all duration-200 ${
                     pathname === item.href
-                      ? 'text-white bg-gray-800'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                      ? 'text-white bg-white/10'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-anthracite-900`}
                 >
                   {item.label}
                 </Link>
@@ -226,7 +232,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-md text-gray-300 hover:bg-gray-800"
+            className="md:hidden p-2.5 rounded-button text-gray-300 hover:text-white hover:bg-white/10 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -250,12 +256,12 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-gray-800">
+          <div className="md:hidden py-4 border-t border-white/10">
             {navItems.map((item) => {
               if (item.submenu) {
                 return (
                   <div key={item.href}>
-                    <div className="px-3 py-2 text-base font-medium text-gray-300">
+                    <div className="px-4 py-2 text-sm font-medium text-gray-400">
                       {item.label}
                     </div>
                     {item.submenu.map((subItem) => (
@@ -263,10 +269,10 @@ export default function Navbar() {
                         key={subItem.href}
                         href={subItem.href}
                         onClick={() => setIsOpen(false)}
-                        className={`block px-6 py-2 rounded-md text-sm ${
+                        className={`block px-6 py-2.5 rounded-button text-sm transition-colors duration-200 ${
                           pathname === subItem.href
-                            ? 'text-white bg-gray-800'
-                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                            ? 'text-white bg-white/10'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                       >
                         {subItem.label}
@@ -275,16 +281,15 @@ export default function Navbar() {
                   </div>
                 )
               }
-              
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  className={`block px-4 py-2.5 rounded-button text-sm font-medium transition-colors duration-200 ${
                     pathname === item.href
-                      ? 'text-white bg-gray-800'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      ? 'text-white bg-white/10'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {item.label}

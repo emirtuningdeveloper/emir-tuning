@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { loginAdmin } from '@/lib/auth'
-import { Lock, Mail, AlertCircle } from 'lucide-react'
+import { loginAdmin, sendAdminPasswordReset } from '@/lib/auth'
+import { Lock, Mail, AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -11,6 +11,8 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,9 +68,36 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Şifre
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Şifre
+                </label>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const e = (email || '').trim()
+                    if (!e) {
+                      setError('Şifre sıfırlama için önce e-posta adresinizi girin.')
+                      return
+                    }
+                    setError('')
+                    setResetSent(false)
+                    setResetting(true)
+                    try {
+                      await sendAdminPasswordReset(e)
+                      setResetSent(true)
+                    } catch (err: unknown) {
+                      setError(err instanceof Error ? err.message : 'Şifre sıfırlama e-postası gönderilemedi.')
+                    } finally {
+                      setResetting(false)
+                    }
+                  }}
+                  disabled={resetting}
+                  className="text-sm text-primary-600 hover:text-primary-700 disabled:opacity-50"
+                >
+                  {resetting ? 'Gönderiliyor...' : 'Şifremi unuttum'}
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -82,6 +111,13 @@ export default function AdminLoginPage() {
                 />
               </div>
             </div>
+
+            {resetSent && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 text-green-800 text-sm">
+                <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                <p>Şifre sıfırlama linki e-postanıza gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.</p>
+              </div>
+            )}
 
             <button
               type="submit"

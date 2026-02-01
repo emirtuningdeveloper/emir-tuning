@@ -1,20 +1,50 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { getProducts } from '@/lib/firestore'
+import { getProducts, getSiteSettings } from '@/lib/firestore'
 import { fetchDriveImages } from '@/lib/drive-client'
 import { fetchCarPartsProducts, CarPartsProduct } from '@/lib/carparts-client'
 import { getProxiedImageUrl } from '@/lib/image-proxy'
 import ProductCard from '@/components/ProductCard'
 import { Product } from '@/lib/types'
-import { productCategories } from '@/lib/product-categories'
-import { Loader2, ChevronRight, Package, Folder } from 'lucide-react'
+import { productCategories, Category } from '@/lib/product-categories'
+import { Loader2, ChevronLeft, ChevronRight, Package, Folder } from 'lucide-react'
+
+/** En çok satanlar slider: otomatik yavaş kayma, alt tuşlar, akıcı geçiş (px/s). Kart ~260px + gap 20px */
+const FEATURED_SCROLL_SPEED = 24
+const FEATURED_ITEM_WIDTH = 280
+const FEATURED_ANIM_MS = 500
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 export default function UrunlerPage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>(productCategories)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [featuredPaused, setFeaturedPaused] = useState(false)
+  const featuredContainerRef = useRef<HTMLDivElement>(null)
+  const featuredTrackRef = useRef<HTMLDivElement>(null)
+  const featuredOffsetRef = useRef(0)
+  const featuredRafRef = useRef<number>(0)
+  const featuredAnimatingRef = useRef(false)
+
+  useEffect(() => {
+    fetch('/api/categories', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setCategories(data)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     async function fetchProducts() {
@@ -181,6 +211,41 @@ export default function UrunlerPage() {
         
         console.log('Total products:', allProducts.length)
         setProducts(allProducts)
+
+        // En çok satanlar slider: ayarlardan kategorileri al, ürünleri çek
+        try {
+          const settings = await getSiteSettings()
+          const paths = settings?.featuredSliderCategoryPaths ?? []
+          let sliderList: Product[] = []
+          if (paths.length > 0) {
+            const byCategoryResponses = await Promise.all(
+              paths.map((categoryPath) =>
+                fetch(`/api/products/by-category?categoryPath=${encodeURIComponent(categoryPath)}&page=1`, { cache: 'no-store' }).then((r) => r.json())
+              )
+            )
+            const byCategoryProducts: Product[] = []
+            for (const data of byCategoryResponses) {
+              if (data?.success && Array.isArray(data.products)) {
+                for (const p of data.products) {
+                  byCategoryProducts.push({
+                    id: p.id,
+                    name: p.name,
+                    description: '',
+                    category: '',
+                    imageUrl: getProxiedImageUrl(p.imageUrl),
+                    createdAt: new Date(),
+                  })
+                }
+              }
+            }
+            sliderList = shuffle(byCategoryProducts).slice(0, 24)
+          } else {
+            sliderList = shuffle(allProducts).slice(0, 24)
+          }
+          setFeaturedProducts(sliderList)
+        } catch (_) {
+          setFeaturedProducts(shuffle(allProducts).slice(0, 24))
+        }
         
       } catch (err: any) {
         console.error('Error loading products:', err)
@@ -194,7 +259,60 @@ export default function UrunlerPage() {
     fetchProducts()
   }, [])
 
-  // Group products by category
+  // En çok satanlar: otomatik yavaş kayma
+  const featuredSegmentWidth = featuredProducts.length * FEATURED_ITEM_WIDTH
+  useEffect(() => {
+    const track = featuredTrackRef.current
+    if (!track || featuredProducts.length === 0 || featuredSegmentWidth <= 0) return
+    let last = performance.now()
+    function tick(now: number) {
+      const dt = (now - last) / 1000
+      last = now
+      if (!featuredPaused && !featuredAnimatingRef.current) {
+        featuredOffsetRef.current += FEATURED_SCROLL_SPEED * dt
+        const seg = featuredSegmentWidth
+        while (featuredOffsetRef.current >= seg) featuredOffsetRef.current -= seg
+        track.style.transform = `translateX(-${featuredOffsetRef.current}px)`
+      }
+      featuredRafRef.current = requestAnimationFrame(tick)
+    }
+    featuredRafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(featuredRafRef.current)
+  }, [featuredProducts.length, featuredPaused, featuredSegmentWidth])
+
+  const featuredGoPrev = useCallback(() => {
+    const track = featuredTrackRef.current
+    if (featuredProducts.length === 0 || !track || featuredAnimatingRef.current) return
+    featuredAnimatingRef.current = true
+    const seg = featuredProducts.length * FEATURED_ITEM_WIDTH
+    const target = (featuredOffsetRef.current - FEATURED_ITEM_WIDTH + seg) % seg
+    track.style.transition = `transform ${FEATURED_ANIM_MS}ms ease-out`
+    track.style.transform = `translateX(-${target}px)`
+    setTimeout(() => {
+      if (!featuredTrackRef.current) return
+      featuredOffsetRef.current = target
+      featuredTrackRef.current.style.transition = ''
+      featuredAnimatingRef.current = false
+    }, FEATURED_ANIM_MS)
+  }, [featuredProducts.length])
+
+  const featuredGoNext = useCallback(() => {
+    const track = featuredTrackRef.current
+    if (featuredProducts.length === 0 || !track || featuredAnimatingRef.current) return
+    featuredAnimatingRef.current = true
+    const seg = featuredProducts.length * FEATURED_ITEM_WIDTH
+    const target = (featuredOffsetRef.current + FEATURED_ITEM_WIDTH) % seg
+    track.style.transition = `transform ${FEATURED_ANIM_MS}ms ease-out`
+    track.style.transform = `translateX(-${target}px)`
+    setTimeout(() => {
+      if (!featuredTrackRef.current) return
+      featuredOffsetRef.current = target
+      featuredTrackRef.current.style.transition = ''
+      featuredAnimatingRef.current = false
+    }, FEATURED_ANIM_MS)
+  }, [featuredProducts.length])
+
+  // Group products by category (ürünler sayfasındaki "Diğer kategoriler" bölümü için)
   const productsByCategory = products.reduce((acc, product) => {
     if (!acc[product.category]) {
       acc[product.category] = []
@@ -203,7 +321,7 @@ export default function UrunlerPage() {
     return acc
   }, {} as Record<string, Product[]>)
 
-  const categories = Object.keys(productsByCategory)
+  const productCategoryNames = Object.keys(productsByCategory)
 
   if (loading) {
     return (
@@ -246,7 +364,7 @@ export default function UrunlerPage() {
           Ürün Kategorileri
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {productCategories.map((category) => (
+          {categories.map((category) => (
             <Link
               key={category.slug}
               href={`/urunler/${category.slug}`}
@@ -268,77 +386,85 @@ export default function UrunlerPage() {
         </div>
       </div>
 
-      <div className="border-t border-gray-200 pt-12 mt-12">
+      <div className="border-t border-anthracite-100 pt-12 mt-12">
+
+      {/* En çok satanlar – otomatik yavaş kayma, alt tuşlar, akıcı geçiş (gölgeli kartlar) */}
+      {featuredProducts.length > 0 && (
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-anthracite-900 tracking-tight">
+              En çok satanlar
+            </h2>
+          </div>
+          <div
+            className="relative overflow-hidden"
+            onMouseEnter={() => setFeaturedPaused(true)}
+            onMouseLeave={() => setFeaturedPaused(false)}
+          >
+            <div ref={featuredContainerRef} className="overflow-hidden">
+              <div
+                ref={featuredTrackRef}
+                className="flex gap-5 will-change-transform"
+                style={{ width: 'max-content' }}
+              >
+                {[...featuredProducts, ...featuredProducts].map((product, i) => (
+                  <div
+                    key={`${product.id}-${i}`}
+                    className="flex-shrink-0 w-52 sm:w-60"
+                    style={{ width: 260, minWidth: 260 }}
+                  >
+                    <ProductCard product={product} variant="slider" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <button
+                type="button"
+                onClick={featuredGoPrev}
+                className="w-9 h-9 rounded-full border border-anthracite-200 bg-white flex items-center justify-center text-anthracite-600 hover:bg-anthracite-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                aria-label="Önceki"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={featuredGoNext}
+                className="w-9 h-9 rounded-full border border-anthracite-200 bg-white flex items-center justify-center text-anthracite-600 hover:bg-anthracite-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                aria-label="Sonraki"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {products.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-500 text-lg">
+          <p className="text-anthracite-600 text-lg">
             Henüz ürün eklenmemiş. Yakında burada olacak!
           </p>
         </div>
       ) : (
         <div className="space-y-16">
-          {/* Body Kits Kategorisi */}
-          {productsByCategory['Body Kits'] && productsByCategory['Body Kits'].length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-8 border-b-2 border-primary-500 pb-2">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                  Body Kits
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  {productsByCategory['Body Kits'].length} ürün gösteriliyor
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-                {productsByCategory['Body Kits'].map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Aksesuarlar Kategorisi (şimdilik boş) */}
-          <div>
-            <div className="flex items-center justify-between mb-8 border-b-2 border-primary-500 pb-2">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Aksesuarlar
-              </h2>
-              {productsByCategory['Aksesuarlar'] && productsByCategory['Aksesuarlar'].length > 0 && (
-                <p className="text-gray-600 text-sm">
-                  {productsByCategory['Aksesuarlar'].length} ürün gösteriliyor
-                </p>
-              )}
-            </div>
-            {productsByCategory['Aksesuarlar'] && productsByCategory['Aksesuarlar'].length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-                {productsByCategory['Aksesuarlar'].map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Yakında burada olacak!</p>
-              </div>
-            )}
-          </div>
-          
-          {/* Diğer kategoriler (Firestore'dan gelenler) */}
-          {categories
-            .filter(cat => cat !== 'Body Kits' && cat !== 'Aksesuarlar')
-            .map((category) => (
-              <div key={category}>
-                <div className="flex items-center justify-between mb-8 border-b-2 border-primary-500 pb-2">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                    {category}
+          {/* Diğer kategoriler (Body Kits block removed; Firestore kategorileri) */}
+          {productCategoryNames
+            .filter(cat => cat !== 'Body Kits')
+            .map((categoryName) => (
+              <div key={categoryName}>
+                <div className="flex items-center justify-between mb-8 border-b border-anthracite-200 pb-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-anthracite-900 tracking-tight">
+                    {categoryName}
                   </h2>
-                  {productsByCategory[category] && productsByCategory[category].length > 0 && (
-                    <p className="text-gray-600 text-sm">
-                      {productsByCategory[category].length} ürün gösteriliyor
+                  {productsByCategory[categoryName] && productsByCategory[categoryName].length > 0 && (
+                    <p className="text-anthracite-600 text-sm">
+                      {productsByCategory[categoryName].length} ürün gösteriliyor
                     </p>
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-                  {productsByCategory[category].map((product) => (
+                  {productsByCategory[categoryName].map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>

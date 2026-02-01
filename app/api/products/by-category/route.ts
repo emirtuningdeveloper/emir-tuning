@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import * as cheerio from 'cheerio'
 import { getDrstuningCategoryUrl } from '@/lib/drstuning'
+import { getProductsByCategoryServer } from '@/lib/firebase-admin-server'
 
 export interface ByCategoryProduct {
   id: string
@@ -75,6 +76,19 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const categoryPath = searchParams.get('categoryPath') || 'body-kit-setler'
     const page = Math.max(1, parseInt(searchParams.get('page') || searchParams.get('tp') || '1', 10))
+
+    // Sayfa 1: Firestore'dan (Harici Ürün Çekme ile eklenen) ürünleri de ekle
+    let firestoreProducts: ByCategoryProduct[] = []
+    if (page === 1) {
+      try {
+        firestoreProducts = await getProductsByCategoryServer(categoryPath)
+        if (process.env.NODE_ENV === 'development' && firestoreProducts.length > 0) {
+          console.log('[by-category] Firestore ürün sayısı:', firestoreProducts.length, 'categoryPath:', categoryPath)
+        }
+      } catch (e) {
+        console.error('[by-category] Firestore okuma hatası:', e)
+      }
+    }
 
     const url = getDrstuningCategoryUrl(categoryPath, page)
     const response = await fetch(url, {
@@ -158,11 +172,12 @@ export async function GET(request: Request) {
 
     const allPages = searchParams.get('allPages') === 'true'
     if (!allPages) {
+      const merged = page === 1 ? [...firestoreProducts, ...pageProducts] : pageProducts
       return NextResponse.json({
         success: true,
-        products: pageProducts,
-        totalCount: pageProducts.length,
-        source: 'DRS Tuning',
+        products: merged,
+        totalCount: merged.length,
+        source: firestoreProducts.length > 0 ? 'Firestore + DRS Tuning' : 'DRS Tuning',
       })
     }
 

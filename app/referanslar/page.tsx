@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Star, Quote } from 'lucide-react'
-import Image from 'next/image'
 import { getApprovedReviews } from '@/lib/firestore'
+import BrandLogoCarousel from '@/components/BrandLogoCarousel'
 
 interface Reference {
   id: string
@@ -44,8 +44,8 @@ export default function ReferanslarPage() {
     return Array.from({ length: 5 }).map((_, index) => (
       <Star
         key={index}
-        className={`w-5 h-5 ${
-          index < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+        className={`w-4 h-4 ${
+          index < rating ? 'text-amber-500 fill-amber-500' : 'text-anthracite-200'
         }`}
       />
     ))
@@ -53,85 +53,105 @@ export default function ReferanslarPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 max-w-content">
         <div className="text-center py-20">
-          <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500 text-lg">Referanslar yükleniyor...</p>
+          <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-anthracite-600 text-sm">Referanslar yükleniyor...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+    <div className="container mx-auto px-4 py-10 md:py-12 max-w-content">
+      <div className="text-center mb-10 md:mb-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-anthracite-900 mb-3 tracking-tight">
           Referanslarımız
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-base text-anthracite-600 max-w-2xl mx-auto">
           Müşterilerimizin deneyimleri ve memnuniyetleri
         </p>
       </div>
 
-      {references.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-gray-500 text-lg">
-            Henüz referans eklenmemiş. Yakında burada olacak!
-          </p>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {references.map((reference) => (
-            <div
-              key={reference.id}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow"
-            >
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Quote className="w-6 h-6 text-primary-600" />
+      {/* Premium brand logo carousel */}
+      <div className="mb-12 md:mb-16">
+        <BrandLogoCarousel />
+      </div>
+
+      {/* Customer reviews – smaller, premium cards */}
+      <div className="mb-12">
+        <h2 className="text-xl md:text-2xl font-bold text-anthracite-900 mb-6 tracking-tight text-center">
+          Müşteri Yorumları
+        </h2>
+        {references.length === 0 ? (
+          <div className="text-center py-16 rounded-2xl bg-anthracite-50/60 border border-anthracite-100">
+            <p className="text-anthracite-600 text-sm">
+              Henüz referans eklenmemiş. Yakında burada olacak!
+            </p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 max-w-6xl mx-auto">
+            {references.map((reference) => (
+              <div
+                key={reference.id}
+                className="bg-white rounded-xl shadow-soft border border-anthracite-100 p-4 md:p-5 hover:shadow-card hover:border-anthracite-200/80 transition-all duration-300"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-anthracite-50 border border-anthracite-100 flex items-center justify-center flex-shrink-0">
+                    <Quote className="w-5 h-5 text-anthracite-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-anthracite-900 text-sm tracking-tight">
+                      {reference.customerName}
+                    </h3>
+                    {reference.vehicleModel && (
+                      <p className="text-xs text-anthracite-500 mt-0.5">{reference.vehicleModel}</p>
+                    )}
+                    {reference.service && (
+                      <p className="text-xs text-primary-600 mt-0.5">{reference.service}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-gray-900">{reference.customerName}</h3>
-                  <p className="text-sm text-gray-600">{reference.vehicleModel}</p>
-                  <p className="text-xs text-primary-600 mt-1">{reference.service}</p>
+
+                <div className="flex items-center gap-1 mb-2">
+                  {renderStars(reference.rating)}
+                  <span className="text-xs text-anthracite-400 ml-1">
+                    {reference.rating}/5
+                  </span>
+                </div>
+
+                <p className="text-anthracite-600 text-sm leading-relaxed line-clamp-4">
+                  &quot;{reference.comment}&quot;
+                </p>
+
+                <div className="text-xs text-anthracite-400 border-t border-anthracite-100 pt-3 mt-3">
+                  {reference.date.toLocaleDateString('tr-TR', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </div>
               </div>
-
-              <div className="flex items-center gap-1 mb-3">
-                {renderStars(reference.rating)}
-              </div>
-
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                &quot;{reference.comment}&quot;
-              </p>
-
-              <div className="text-xs text-gray-400 border-t pt-4">
-                {reference.date.toLocaleDateString('tr-TR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* İstatistikler */}
-      <div className="mt-16 bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-xl p-8 md:p-12">
+      <div className="mt-12 md:mt-16 bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-2xl p-6 md:p-10 border border-primary-500/20">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+          <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center tracking-tight">
             Müşteri Memnuniyeti
           </h2>
-          <div className="grid md:grid-cols-3 gap-8 text-center">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 text-center">
             <div>
-              <div className="text-4xl md:text-5xl font-bold mb-2">
+              <div className="text-3xl md:text-4xl font-bold mb-1">
                 {references.length}+
               </div>
-              <div className="text-primary-100">Mutlu Müşteri</div>
+              <div className="text-primary-100 text-sm">Mutlu Müşteri</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold mb-2">
+              <div className="text-3xl md:text-4xl font-bold mb-1">
                 {references.length > 0
                   ? (
                       references.reduce((sum, ref) => sum + ref.rating, 0) /
@@ -139,13 +159,13 @@ export default function ReferanslarPage() {
                     ).toFixed(1)
                   : '0'}
               </div>
-              <div className="text-primary-100">Ortalama Puan</div>
+              <div className="text-primary-100 text-sm">Ortalama Puan</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold mb-2">
+              <div className="text-3xl md:text-4xl font-bold mb-1">
                 {references.filter((ref) => ref.rating === 5).length}
               </div>
-              <div className="text-primary-100">5 Yıldızlı Değerlendirme</div>
+              <div className="text-primary-100 text-sm">5 Yıldızlı Değerlendirme</div>
             </div>
           </div>
         </div>

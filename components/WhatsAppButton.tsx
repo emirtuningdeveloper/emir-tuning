@@ -1,10 +1,27 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { MessageCircle } from 'lucide-react'
+import { getSiteSettings } from '@/lib/firestore'
+
+const DEFAULT_PHONE = '+905395109013'
 
 export default function WhatsAppButton() {
-  const phoneNumber = '+905395109013'
-  const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}`
+  const [phone, setPhone] = useState<string | null>(null)
+
+  useEffect(() => {
+    getSiteSettings()
+      .then((s) => {
+        const raw = (s?.whatsappPhone || s?.contactPhone || DEFAULT_PHONE || '').trim()
+        setPhone(raw || DEFAULT_PHONE)
+      })
+      .catch(() => setPhone(DEFAULT_PHONE))
+  }, [])
+
+  if (!phone) return null
+
+  const digits = phone.replace(/[^0-9]/g, '')
+  const whatsappUrl = `https://wa.me/${digits}`
 
   return (
     <a

@@ -5,7 +5,12 @@ import { Car } from 'lucide-react'
 import { getSiteSettings } from '@/lib/firestore'
 import { toDirectDriveImageUrl } from '@/lib/drive-logo-url'
 
-export default function Logo() {
+interface LogoProps {
+  /** Compact mode for footer/navbar: preserves aspect ratio, no min height */
+  compact?: boolean
+}
+
+export default function Logo({ compact = false }: LogoProps) {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [logoVersion, setLogoVersion] = useState<number>(() => Date.now())
   const [loading, setLoading] = useState(true)
@@ -46,17 +51,17 @@ export default function Logo() {
 
   if (loading) {
     return (
-      <div className="relative w-full">
-        <div className="relative rounded-2xl overflow-hidden bg-gray-100 animate-pulse h-32 md:h-40 lg:h-48"></div>
+      <div className={`relative ${compact ? 'h-full min-w-[80px]' : 'w-full'}`}>
+        <div className={`relative overflow-hidden bg-gray-100 animate-pulse ${compact ? 'h-full w-full max-h-12 rounded-lg object-contain' : 'rounded-2xl h-32 md:h-40 lg:h-48'}`} />
       </div>
     )
   }
 
   if (!logoUrl) {
     return (
-      <div className="relative w-full">
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center h-32 md:h-40 lg:h-48">
-          <Car className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 text-primary-600" />
+      <div className={`relative ${compact ? 'h-full min-w-[80px]' : 'w-full'}`}>
+        <div className={`relative overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center rounded-2xl ${compact ? 'h-full w-full max-h-12' : 'h-32 md:h-40 lg:h-48'}`}>
+          <Car className={compact ? 'w-8 h-8 text-primary-600' : 'w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 text-primary-600'} />
         </div>
       </div>
     )
@@ -66,13 +71,13 @@ export default function Logo() {
   const directUrl = `${logoUrl}${logoUrl.includes('?') ? '&' : '?'}v=${logoVersion}`
 
   return (
-    <div className="relative w-full">
-      <div className="relative rounded-2xl overflow-hidden">
+    <div className={`relative ${compact ? 'h-full w-auto flex items-center' : 'w-full'}`}>
+      <div className={`relative overflow-hidden ${compact ? 'h-full w-full max-h-12 flex items-center' : 'rounded-2xl'}`}>
         <img
           src={proxiedUrl}
           alt="Emir Tuning Logo"
-          className="w-full h-auto rounded-2xl block"
-          style={{ minHeight: '200px', backgroundColor: 'transparent', display: 'block' }}
+          className={`rounded-2xl block ${compact ? 'max-h-full w-auto object-contain' : 'w-full h-auto'}`}
+          style={compact ? { maxHeight: '48px', width: 'auto', objectFit: 'contain' } : { minHeight: '200px', backgroundColor: 'transparent', display: 'block' }}
           onError={(e) => {
             const target = e.target as HTMLImageElement
             if (target.src !== directUrl) {
@@ -85,7 +90,7 @@ export default function Logo() {
           }}
         />
         <div className="logo-placeholder hidden absolute inset-0 w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center rounded-2xl">
-          <Car className="w-24 h-24 text-primary-600" />
+          <Car className={compact ? 'w-8 h-8 text-primary-600' : 'w-24 h-24 text-primary-600'} />
         </div>
       </div>
     </div>

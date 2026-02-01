@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { getSiteSettings, updateSiteSettings } from '@/lib/firestore-admin'
 import { SiteSettings } from '@/lib/types'
 import { toDirectDriveImageUrl } from '@/lib/drive-logo-url'
+import { productCategories, getCategoryPathsGrouped } from '@/lib/product-categories'
 import { ChevronLeft, Save, Loader2, Settings } from 'lucide-react'
 
 const defaultForm: Omit<SiteSettings, 'id' | 'updatedAt'> = {
@@ -14,9 +15,13 @@ const defaultForm: Omit<SiteSettings, 'id' | 'updatedAt'> = {
   logoUrl: '',
   contactEmail: '',
   contactPhone: '',
+  whatsappPhone: '',
   address: '',
   homepageText: '',
   aboutPageText: '',
+  aboutValues: [],
+  whyChooseUs: [],
+  featuredSliderCategoryPaths: [],
   socialMedia: {
     facebook: '',
     instagram: '',
@@ -57,9 +62,13 @@ export default function AdminAyarlarPage() {
             logoUrl: s.logoUrl ?? '',
             contactEmail: s.contactEmail ?? '',
             contactPhone: s.contactPhone ?? '',
+            whatsappPhone: s.whatsappPhone ?? '',
             address: s.address ?? '',
             homepageText: s.homepageText ?? '',
             aboutPageText: s.aboutPageText ?? '',
+            aboutValues: Array.isArray(s.aboutValues) ? s.aboutValues : [],
+            whyChooseUs: Array.isArray(s.whyChooseUs) ? s.whyChooseUs : [],
+            featuredSliderCategoryPaths: s.featuredSliderCategoryPaths ?? [],
             socialMedia: {
               facebook: s.socialMedia?.facebook ?? '',
               instagram: s.socialMedia?.instagram ?? '',
@@ -104,6 +113,7 @@ export default function AdminAyarlarPage() {
         console.error('Firestore PERMISSION_DENIED: Site ayarları yazma yetkisi yok. Firebase Console → Firestore → Rules bölümünde siteSettings için write kuralını kontrol edin.')
         alert('Kaydetme hatası: Yetki reddedildi (Firestore). Firebase Console → Firestore → Kurallar\'da siteSettings için yazma iznini kontrol edin.')
       } else {
+        console.error('Admin ayarlar: Save failed', err)
         alert('Kaydetme hatası: ' + (err?.message ?? String(e)))
       }
     } finally {
@@ -144,7 +154,7 @@ export default function AdminAyarlarPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Aktif logo (sitede görünen)</label>
-                    <p className="text-xs text-gray-500 mb-2">Google Drive&apos;dan yüklenen mevcut logo:</p>
+                    <p className="text-xs text-gray-500 mb-2">Google Drive&apos;dan yüklenen, sitede şu an görünen logo:</p>
                     {activeLogoUrl ? (
                       <div className="p-3 bg-gray-50 rounded-lg border inline-block">
                         <img
@@ -164,7 +174,7 @@ export default function AdminAyarlarPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Site logosu (link)</label>
-                    <p className="text-xs text-gray-500 mb-1">Özel logo URL&apos;i (bu alan doluysa ayarlardaki logo kullanılabilir):</p>
+                    <p className="text-xs text-gray-500 mb-1">Özel logo görseli URL&apos;i. Bu alan doluysa sitede bu logo kullanılır.</p>
                     <input
                       type="url"
                       value={form.logoUrl ?? ''}
@@ -217,73 +227,40 @@ export default function AdminAyarlarPage() {
                       placeholder="Anasayfada gösterilecek metin (isteğe bağlı)"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Hakkımızda metni</label>
-                    <textarea
-                      value={form.aboutPageText ?? ''}
-                      onChange={(e) => setForm((f) => ({ ...f, aboutPageText: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      rows={8}
-                      placeholder="Hakkımızda sayfasında gösterilecek metin (isteğe bağlı; boş bırakırsanız varsayılan metin gösterilir)"
-                    />
-                  </div>
                 </div>
               </section>
 
               <section className="bg-white rounded-lg border p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">İletişim</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-                    <input
-                      type="email"
-                      value={form.contactEmail}
-                      onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      placeholder="info@emirtuning.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                    <input
-                      type="text"
-                      value={form.contactPhone}
-                      onChange={(e) => setForm((f) => ({ ...f, contactPhone: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      placeholder="+90 ..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Adres</label>
-                    <textarea
-                      value={form.address}
-                      onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      rows={2}
-                      placeholder="Adres"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <section className="bg-white rounded-lg border p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Sosyal medya</h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {(['facebook', 'instagram', 'twitter', 'youtube'] as const).map((key) => (
-                    <div key={key}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{key}</label>
-                      <input
-                        type="url"
-                        value={form.socialMedia?.[key] ?? ''}
-                        onChange={(e) =>
-                          setForm((f) => ({
-                            ...f,
-                            socialMedia: { ...f.socialMedia, [key]: e.target.value },
-                          }))
-                        }
-                        className="w-full px-3 py-2 border rounded-lg"
-                        placeholder={`https://${key}.com/...`}
-                      />
+                <h2 className="text-lg font-bold text-gray-900 mb-4">En çok satanlar slider (Ürünler sayfası)</h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Ürünler sayfasındaki &quot;En çok satanlar&quot; kaydırıcısında hangi kategorilerden ürün gösterileceğini seçin. Birden fazla kategori seçebilirsiniz; seçilen kategorilerden rastgele ürünler listelenir.
+                </p>
+                <div className="max-h-64 overflow-y-auto border rounded-lg p-3 space-y-2">
+                  {getCategoryPathsGrouped(productCategories).map((g) => (
+                    <div key={g.group}>
+                      <p className="text-xs font-semibold text-gray-600 mb-1">{g.group}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {g.options.map((opt) => {
+                          const paths: string[] = form.featuredSliderCategoryPaths ?? []
+                          const checked = paths.includes(opt.path)
+                          return (
+                            <label key={opt.path} className="inline-flex items-center gap-1.5 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  const next = checked
+                                    ? paths.filter((p) => p !== opt.path)
+                                    : [...paths, opt.path]
+                                  setForm((f) => ({ ...f, featuredSliderCategoryPaths: next }))
+                                }}
+                                className="rounded border-gray-300"
+                              />
+                              <span className="text-gray-700">{opt.label}</span>
+                            </label>
+                          )
+                        })}
+                      </div>
                     </div>
                   ))}
                 </div>

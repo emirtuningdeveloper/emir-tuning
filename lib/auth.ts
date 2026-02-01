@@ -1,6 +1,7 @@
 import { 
   signInWithEmailAndPassword, 
   signOut, 
+  sendPasswordResetEmail,
   User,
   onAuthStateChanged 
 } from 'firebase/auth'
@@ -8,8 +9,7 @@ import { getAuthInstance } from './firebase'
 
 // Admin email listesi (production'da Firestore'dan çekilebilir)
 const ADMIN_EMAILS = [
-  'abdrhmn.ozden44@gmail.com',
-  // Buraya admin email'lerini ekleyebilirsiniz
+  'emirtuningdeveloper@gmail.com',
 ]
 
 export async function loginAdmin(email: string, password: string) {
@@ -27,6 +27,14 @@ export async function loginAdmin(email: string, password: string) {
   } catch (error: any) {
     throw new Error(error.message || 'Giriş yapılamadı')
   }
+}
+
+/** Şifre sıfırlama e-postası gönderir (admin giriş sayfası "Şifremi unuttum" için) */
+export async function sendAdminPasswordReset(email: string): Promise<void> {
+  const trimmed = (email || '').trim()
+  if (!trimmed) throw new Error('E-posta adresi gerekli')
+  const auth = getAuthInstance()
+  await sendPasswordResetEmail(auth, trimmed)
 }
 
 export async function logoutAdmin() {

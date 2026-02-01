@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { productCategories, getReadableCategoryPath } from '@/lib/product-categories'
+import { productCategories, getReadableCategoryPath, Category } from '@/lib/product-categories'
 import { getProxiedImageUrl } from '@/lib/image-proxy'
 import { Loader2, Package, ChevronRight } from 'lucide-react'
 
@@ -18,7 +18,8 @@ export default function UrunlerCategoryPage() {
   const params = useParams()
   const slug = params.slug as string[] | undefined
   const categoryPath = Array.isArray(slug) ? slug.join('/') : ''
-  const categoryTitle = getReadableCategoryPath(categoryPath, productCategories) || categoryPath || 'Ürünler'
+  const [categories, setCategories] = useState<Category[]>(productCategories)
+  const categoryTitle = getReadableCategoryPath(categoryPath, categories) || categoryPath || 'Ürünler'
 
   const [products, setProducts] = useState<CategoryProduct[]>([])
   const [outOfStockIds, setOutOfStockIds] = useState<Set<string>>(new Set())
@@ -32,6 +33,15 @@ export default function UrunlerCategoryPage() {
   const loadingMoreRef = useRef(false)
   pageRef.current = page
   loadingMoreRef.current = loadingMore
+
+  useEffect(() => {
+    fetch('/api/categories', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setCategories(data)
+      })
+      .catch(() => {})
+  }, [])
 
   // Stok bitti işaretli ürün ID'leri (ürünler listeden çıkarılmaz, sadece "Stok yok" gösterilir)
   useEffect(() => {

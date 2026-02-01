@@ -1,6 +1,6 @@
 import { collection, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocs, query, where, getDoc, setDoc, writeBatch, orderBy, limit, Timestamp } from 'firebase/firestore'
 import { getDb } from './firebase'
-import { Product, ProductOverride, CategoryUrlMapping, CategoryExternalSource, Service, Announcement, Review, SiteSettings, ProductSearchIndex, ApiConfig, ApiLog, ApiStats } from './types'
+import { Product, ProductOverride, CategoryUrlMapping, CategoryExternalSource, Service, Announcement, Review, SiteSettings, ProductSearchIndex, ApiConfig, ApiLog, ApiStats, ManagedCategoryItem } from './types'
 
 /** Firestore undefined kabul etmez; objeden undefined alanları çıkar */
 function stripUndefined<T extends Record<string, unknown>>(obj: T): Record<string, unknown> {
@@ -579,16 +579,32 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         updatedAt: data.updatedAt?.toDate() || new Date(),
       } as SiteSettings
     } else {
-      // Varsayılan ayarları oluştur
+      // Varsayılan ayarları oluştur (Değerlerimiz / Neden Bizi Seçmelisiniz dahil)
       const defaultSettings: Omit<SiteSettings, 'id' | 'updatedAt'> = {
         siteName: 'Emir Tuning',
         siteDescription: 'Otomotiv Tuning Dünyasında Profesyonel Çözümler',
         logoUrl: '',
         contactEmail: '',
         contactPhone: '',
+        whatsappPhone: '',
         address: '',
+        workingHours: '',
         homepageText: '',
         aboutPageText: '',
+        aboutValues: [
+          { title: 'Misyonumuz', description: 'Müşterilerimize en kaliteli tuning ürünleri ve hizmetlerini sunarak, araçlarının performansını ve görünümünü en üst seviyeye çıkarmak.', icon: 'Target' },
+          { title: 'Vizyonumuz', description: "Türkiye'nin önde gelen tuning merkezi olmak ve sektörde kalite standartlarını belirlemek.", icon: 'Heart' },
+          { title: 'Kalite', description: 'Tüm ürün ve hizmetlerimizde en yüksek kalite standartlarını koruyor, müşteri memnuniyetini ön planda tutuyoruz.', icon: 'Award' },
+          { title: 'Uzman Ekip', description: 'Yılların deneyimine sahip uzman ekibimizle, her projede mükemmellik hedefliyoruz.', icon: 'Users' },
+        ],
+        whyChooseUs: [
+          { title: 'Geniş Ürün Yelpazesi', description: 'Tuning dünyasının en kaliteli markalarını bünyemizde bulunduruyoruz.', icon: 'Package' },
+          { title: 'Uzman Ekip', description: 'Yılların deneyimine sahip teknik ekibimizle her projede mükemmellik hedefliyoruz.', icon: 'Users' },
+          { title: 'Kalite Garantisi', description: 'Tüm ürün ve hizmetlerimizde kalite garantisi sunuyoruz.', icon: 'ShieldCheck' },
+          { title: 'Müşteri Odaklı Hizmet', description: 'Her müşterimizin ihtiyacına özel çözümler üretiyor, memnuniyeti ön planda tutuyoruz.', icon: 'Heart' },
+          { title: 'Rekabetçi Fiyatlar', description: 'Kaliteli ürün ve hizmetleri uygun fiyatlarla sunuyoruz.', icon: 'Award' },
+        ],
+        featuredSliderCategoryPaths: [],
         socialMedia: {
           facebook: '',
           instagram: '',
@@ -633,6 +649,36 @@ export async function updateSiteSettings(settings: Omit<SiteSettings, 'id' | 'up
     await setDoc(settingsRef, stripUndefined(flat), { merge: true })
   } catch (error) {
     console.error('Error updating site settings:', error)
+    throw error
+  }
+}
+
+// ==================== Kategori Yönetimi (siteSettings/categories) ====================
+
+const CATEGORIES_DOC_ID = 'categories'
+
+export async function getCategoryItems(): Promise<ManagedCategoryItem[]> {
+  try {
+    const db = getDb()
+    const ref = doc(db, 'siteSettings', CATEGORIES_DOC_ID)
+    const snap = await getDoc(ref)
+    if (snap.exists() && Array.isArray(snap.data()?.items)) {
+      return snap.data().items as ManagedCategoryItem[]
+    }
+    return []
+  } catch (error) {
+    console.error('Error getting category items:', error)
+    return []
+  }
+}
+
+export async function updateCategoryItems(items: ManagedCategoryItem[]): Promise<void> {
+  try {
+    const db = getDb()
+    const ref = doc(db, 'siteSettings', CATEGORIES_DOC_ID)
+    await setDoc(ref, { items, updatedAt: serverTimestamp() }, { merge: true })
+  } catch (error) {
+    console.error('Error updating category items:', error)
     throw error
   }
 }

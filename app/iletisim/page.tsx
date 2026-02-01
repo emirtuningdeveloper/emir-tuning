@@ -1,9 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react'
+import { getSiteSettings } from '@/lib/firestore'
+
+const DEFAULT_ADDRESS = 'Tuning Merkezi\nİstanbul, Türkiye'
+const DEFAULT_PHONE = '+90 (XXX) XXX XX XX'
+const DEFAULT_EMAIL = 'info@emirtuning.com'
+const DEFAULT_WORKING_HOURS = ['Pazartesi - Cuma: 09:00 - 18:00', 'Cumartesi: 09:00 - 16:00', 'Pazar: Kapalı']
 
 export default function IletisimPage() {
+  const [contactInfo, setContactInfo] = useState({
+    address: DEFAULT_ADDRESS,
+    phone: DEFAULT_PHONE,
+    email: DEFAULT_EMAIL,
+    workingHours: DEFAULT_WORKING_HOURS,
+  })
+  const [contactLoading, setContactLoading] = useState(true)
+
+  useEffect(() => {
+    getSiteSettings()
+      .then((s) => {
+        setContactInfo({
+          address: s?.address?.trim() || DEFAULT_ADDRESS,
+          phone: s?.contactPhone?.trim() || DEFAULT_PHONE,
+          email: s?.contactEmail?.trim() || DEFAULT_EMAIL,
+          workingHours: (s?.workingHours?.trim() || DEFAULT_WORKING_HOURS.join('\n')).split(/\n/).filter(Boolean),
+        })
+      })
+      .catch(() => {})
+      .finally(() => setContactLoading(false))
+  }, [])
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -56,52 +84,58 @@ export default function IletisimPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">İletişim Bilgileri</h2>
           
           <div className="space-y-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-6 h-6 text-primary-600" />
+            {contactLoading ? (
+              <div className="space-y-6 animate-pulse">
+                <div className="h-20 bg-gray-200 rounded-lg" />
+                <div className="h-20 bg-gray-200 rounded-lg" />
+                <div className="h-20 bg-gray-200 rounded-lg" />
+                <div className="h-24 bg-gray-200 rounded-lg mt-8" />
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Adres</h3>
-                <p className="text-gray-600">
-                  Tuning Merkezi<br />
-                  İstanbul, Türkiye
-                </p>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6 text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Adres</h3>
+                    <p className="text-gray-600 whitespace-pre-line">{contactInfo.address}</p>
+                  </div>
+                </div>
 
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Phone className="w-6 h-6 text-primary-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Telefon</h3>
-                <p className="text-gray-600">
-                  +90 (XXX) XXX XX XX
-                </p>
-              </div>
-            </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-6 h-6 text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Telefon</h3>
+                    <p className="text-gray-600">{contactInfo.phone}</p>
+                  </div>
+                </div>
 
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Mail className="w-6 h-6 text-primary-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">E-posta</h3>
-                <p className="text-gray-600">
-                  info@emirtuning.com
-                </p>
-              </div>
-            </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">E-posta</h3>
+                    <p className="text-gray-600">{contactInfo.email}</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="mt-8 p-6 bg-primary-50 rounded-lg">
-            <h3 className="font-semibold text-gray-900 mb-2">Çalışma Saatleri</h3>
-            <div className="space-y-1 text-gray-600">
-              <p>Pazartesi - Cuma: 09:00 - 18:00</p>
-              <p>Cumartesi: 09:00 - 16:00</p>
-              <p>Pazar: Kapalı</p>
+          {!contactLoading && (
+            <div className="mt-8 p-6 bg-primary-50 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-2">Çalışma Saatleri</h3>
+              <div className="space-y-1 text-gray-600">
+                {contactInfo.workingHours.map((line, i) => (
+                  <p key={i}>{line}</p>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* İletişim Formu */}
