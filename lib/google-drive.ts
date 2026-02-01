@@ -75,6 +75,31 @@ export interface DriveFile {
 }
 
 /**
+ * Ana klasördeki adı verilen alt klasörün ID'sini bul (isim eşleşmesi)
+ */
+export async function findSubfolderByName(
+  parentFolderId: string,
+  folderName: string
+): Promise<string | null> {
+  try {
+    const drive = getDriveClient()
+    const res = await drive.files.list({
+      q: `'${parentFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      fields: 'files(id, name)',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+    })
+    const folders = (res.data.files || []) as { id: string; name: string }[]
+    const found = folders.find(
+      (f) => f.name.toLowerCase().trim() === folderName.toLowerCase().trim()
+    )
+    return found ? found.id : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Belirli bir klasördeki tüm görselleri getir
  */
 export async function getImagesFromFolder(folderId: string): Promise<DriveFile[]> {

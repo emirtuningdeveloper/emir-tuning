@@ -65,6 +65,7 @@ function getVisibleCount(): number {
 export default function BrandLogoCarousel() {
   const [logos, setLogos] = useState<BrandLogoItem[]>(() => cachedBrandLogos)
   const [loading, setLoading] = useState(() => cachedBrandLogos.length === 0)
+  const [apiError, setApiError] = useState<string | null>(null)
   const [itemWidth, setItemWidth] = useState(200)
   const [paused, setPaused] = useState(false)
   const [urlVersion] = useState(() => Date.now())
@@ -82,7 +83,15 @@ export default function BrandLogoCarousel() {
       setLoading(false)
     }
     fetch('/api/drive/brands')
-      .then((res) => (res.ok ? res.json() : { images: [] }))
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setApiError(data?.error || `HTTP ${res.status}`)
+          return { ...data, images: [] }
+        }
+        setApiError(null)
+        return data
+      })
       .then((data) => {
         const list = Array.isArray(data.images) ? data.images : []
         if (list.length > 0) {
@@ -92,6 +101,7 @@ export default function BrandLogoCarousel() {
       })
       .catch((err) => {
         console.error('Brand logos fetch failed:', err)
+        setApiError(err?.message || 'Bağlantı hatası')
         if (cachedBrandLogos.length === 0) setLogos([])
       })
       .finally(() => setLoading(false))
@@ -189,10 +199,23 @@ export default function BrandLogoCarousel() {
     return (
       <div className="w-full max-w-content mx-auto py-10 px-6 text-center">
         <p className="text-anthracite-600 text-sm md:text-base leading-relaxed max-w-xl mx-auto">
-          Marka logoları burada görünecek.{' '}
-          <span className="text-anthracite-500">
-            <code className="bg-white/80 px-1.5 py-0.5 rounded text-xs">GOOGLE_DRIVE_BRANDS_FOLDER_ID</code> değerini .env.local dosyasına ekleyin.
-          </span>
+          {apiError ? (
+            <>
+              Marka logoları yüklenemedi:{' '}
+              <span className="text-red-600 font-medium">{apiError}</span>
+              <br />
+              <span className="text-anthracite-500 text-xs mt-2 block">
+                Vercel env değişkenlerini kontrol edin. GOOGLE_PRIVATE_KEY formatı özellikle önemli (tek satır, \\n ile).
+              </span>
+            </>
+          ) : (
+            <>
+              Marka logoları burada görünecek.{' '}
+              <span className="text-anthracite-500">
+                <code className="bg-white/80 px-1.5 py-0.5 rounded text-xs">GOOGLE_DRIVE_BRANDS_FOLDER_ID</code> değerini ekleyin.
+              </span>
+            </>
+          )}
         </p>
       </div>
     )
