@@ -16,15 +16,16 @@ export async function POST(request: Request) {
     }
     // Kategori path'ini URL slug formatına çevir ki kategori sayfası (slug ile) ile eşleşsin
     const category = categoryPathToSlug(categoryRaw)
-    const toAdd = products
+    type ToAddItem = { name: string; description: string; category: string; imageUrl?: string }
+    const toAdd: ToAddItem[] = products
       .filter((p: unknown) => p && typeof (p as { name?: string }).name === 'string')
-      .map((p: { name: string; description?: string; imageUrl?: string }) => ({
+      .map((p: { name: string; description?: string; imageUrl?: string }): ToAddItem => ({
         name: (p.name || '').trim(),
         description: typeof p.description === 'string' ? p.description.trim() : (p.name || '').trim(),
         category,
         imageUrl: typeof p.imageUrl === 'string' && p.imageUrl.trim() ? p.imageUrl.trim() : undefined,
       }))
-      .filter((p) => p.name.length > 0)
+      .filter((p: ToAddItem) => p.name.length > 0)
     const ids: string[] = []
     for (const p of toAdd) {
       const id = await addProductServer({

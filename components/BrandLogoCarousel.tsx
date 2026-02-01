@@ -129,6 +129,7 @@ export default function BrandLogoCarousel() {
     if (!track || logos.length === 0) return
     let last = performance.now()
     function tick(now: number) {
+      if (!track) return
       const dt = (now - last) / 1000
       last = now
       if (!paused && !isButtonAnimatingRef.current && segmentWidthRef.current > 0) {

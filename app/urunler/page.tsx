@@ -266,6 +266,7 @@ export default function UrunlerPage() {
     if (!track || featuredProducts.length === 0 || featuredSegmentWidth <= 0) return
     let last = performance.now()
     function tick(now: number) {
+      if (!track) return
       const dt = (now - last) / 1000
       last = now
       if (!featuredPaused && !featuredAnimatingRef.current) {

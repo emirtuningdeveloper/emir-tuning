@@ -165,7 +165,7 @@ export default function HariciUrunCekmePage() {
           </h1>
           <p className="text-gray-600 mb-6">
             Link yapıştırıp önce &quot;Test/Ön gösterim için ürünleri çek&quot; ile ürünleri görün, düzenleyin, sonra
-            &quot;Seçilen ürünleri Emir Tuning'e ekle&quot; ile kalıcı ekleyin.
+            &quot;Seçilen ürünleri Emir Tuning&apos;e ekle&quot; ile kalıcı ekleyin.
           </p>
 
           {/* Ürün çekilecek kategori */}
