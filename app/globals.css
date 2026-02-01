@@ -3,25 +3,39 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
-  --surface: #ffffff;
-  --surface-elevated: #fafafa;
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --section-bg: #f8f9fa;
+  --foreground-rgb: 255, 255, 255;
+  --background: #0a0a0a;
+  --surface: #141414;
+  --surface-elevated: #1a1a1a;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --section-bg: #0d0d0d;
+  --gradient-blur: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.07) 0%, transparent 60%);
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: var(--background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Blok tarzı hafif gradient blur arka plan */
+.dark-section {
+  position: relative;
+  background: var(--section-bg);
+}
+.dark-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-blur);
+  pointer-events: none;
+}
+
+/* İletişim sayfası Konu dropdown - seçenekler siyah yazı beyaz arka plan */
+.contact-select option {
+  background: #fff;
+  color: #111;
 }
 
 @layer utilities {

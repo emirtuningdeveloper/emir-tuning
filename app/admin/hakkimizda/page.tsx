@@ -71,7 +71,7 @@ export default function AdminHakkimizdaPage() {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4">
@@ -100,7 +100,7 @@ export default function AdminHakkimizdaPage() {
                 <textarea
                   value={aboutPageText}
                   onChange={(e) => setAboutPageText(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                   rows={8}
                   placeholder="Hakkımızda sayfasında gösterilecek metin (isteğe bağlı)"
                 />
@@ -146,7 +146,7 @@ export default function AdminHakkimizdaPage() {
                             next[idx] = { ...next[idx], title: e.target.value }
                             setAboutValues(next)
                           }}
-                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                          className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900"
                           placeholder="Başlık"
                         />
                         <textarea
@@ -156,7 +156,7 @@ export default function AdminHakkimizdaPage() {
                             next[idx] = { ...next[idx], description: e.target.value }
                             setAboutValues(next)
                           }}
-                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                          className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900"
                           rows={2}
                           placeholder="Açıklama"
                         />
@@ -167,7 +167,7 @@ export default function AdminHakkimizdaPage() {
                             next[idx] = { ...next[idx], icon: e.target.value }
                             setAboutValues(next)
                           }}
-                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                          className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900"
                         >
                           {ICON_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>{opt}</option>
@@ -226,7 +226,7 @@ export default function AdminHakkimizdaPage() {
                             next[idx] = { ...next[idx], title: e.target.value }
                             setWhyChooseUs(next)
                           }}
-                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                          className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900"
                           placeholder="Başlık"
                         />
                         <textarea
@@ -236,7 +236,7 @@ export default function AdminHakkimizdaPage() {
                             next[idx] = { ...next[idx], description: e.target.value }
                             setWhyChooseUs(next)
                           }}
-                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                          className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900"
                           rows={2}
                           placeholder="Açıklama"
                         />
@@ -247,7 +247,7 @@ export default function AdminHakkimizdaPage() {
                             next[idx] = { ...next[idx], icon: e.target.value }
                             setWhyChooseUs(next)
                           }}
-                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                          className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900"
                         >
                           {ICON_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>{opt}</option>

@@ -151,7 +151,7 @@ export default function AdminReferanslarPage() {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -262,7 +262,7 @@ export default function AdminReferanslarPage() {
                     type="text"
                     value={form.customerName}
                     onChange={(e) => setForm((f) => ({ ...f, customerName: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     placeholder="Ahmet Yılmaz"
                   />
                 </div>
@@ -272,7 +272,7 @@ export default function AdminReferanslarPage() {
                     type="text"
                     value={form.vehicleModel}
                     onChange={(e) => setForm((f) => ({ ...f, vehicleModel: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     placeholder="BMW 3.20i"
                   />
                 </div>
@@ -282,7 +282,7 @@ export default function AdminReferanslarPage() {
                     type="text"
                     value={form.service}
                     onChange={(e) => setForm((f) => ({ ...f, service: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     placeholder="Chip Tuning"
                   />
                 </div>
@@ -291,7 +291,7 @@ export default function AdminReferanslarPage() {
                   <textarea
                     value={form.comment}
                     onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     rows={4}
                     placeholder="Yorum metni..."
                   />
@@ -304,7 +304,7 @@ export default function AdminReferanslarPage() {
                     max={5}
                     value={form.rating}
                     onChange={(e) => setForm((f) => ({ ...f, rating: parseInt(e.target.value, 10) || 5 }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                   />
                 </div>
                 <div>
@@ -313,7 +313,7 @@ export default function AdminReferanslarPage() {
                     type="url"
                     value={form.imageUrl}
                     onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     placeholder="https://..."
                   />
                 </div>

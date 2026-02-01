@@ -72,18 +72,18 @@ export default function HakkimizdaPage() {
       </section>
 
       {/* Hikayemiz (admin Ayarlar’dan düzenlenebilir) */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
+      <section className="dark-section py-20">
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 text-center">
               Hikayemiz
             </h2>
             {aboutText === null ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
               </div>
             ) : (
-              <div className="prose prose-lg max-w-none text-gray-600 space-y-4">
+              <div className="prose prose-lg max-w-none text-gray-300 space-y-4 [&_p]:text-gray-300">
                 {(aboutText || DEFAULT_ABOUT).split(/\n\n+/).map((para, i) => (
                   <p key={i}>{para.trim()}</p>
                 ))}
@@ -94,31 +94,26 @@ export default function HakkimizdaPage() {
       </section>
 
       {/* Değerlerimiz (premium, admin-editable) */}
-      <section className="py-20 md:py-24 bg-[#f7f6f4]">
-        <div className="container mx-auto px-4 max-w-content">
+      <section className="dark-section py-20 md:py-24">
+        <div className="container mx-auto px-4 max-w-content relative z-10">
           <div className="text-center mb-16 md:mb-20">
-            <h2 className="text-3xl md:text-4xl font-bold text-anthracite-900 mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
               Değerlerimiz
             </h2>
-            <p className="text-lg text-anthracite-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
               Çalışma prensiplerimiz ve değerlerimiz
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-6xl mx-auto">
             {aboutValues.map((value, index) => (
-              <div key={index} className="group bg-white rounded-lg overflow-hidden h-[200px] flex flex-col shadow-soft hover:shadow-card hover:-translate-y-0.5 transition-all duration-300">
-                <div className="bg-anthracite-800 px-6 py-3 shrink-0">
-                  <h3 className="text-lg font-bold text-white tracking-tight">
-                    {value.title}
-                  </h3>
-                </div>
-                <div className="p-5 flex-1 min-h-0 overflow-auto">
-                  <p className="text-anthracite-600 text-sm leading-relaxed">
-                    {value.description}
-                  </p>
-                </div>
-                <div className="h-1.5 bg-anthracite-800 shrink-0" aria-hidden />
+              <div key={index} className="group rounded-xl bg-white/5 border border-white/10 p-6 hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300">
+                <h3 className="text-lg font-bold text-white tracking-tight mb-4">
+                  {value.title}
+                </h3>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  {value.description}
+                </p>
               </div>
             ))}
           </div>
@@ -144,32 +139,27 @@ export default function HakkimizdaPage() {
       </section>
 
       {/* Neden Bizi Seçmelisiniz (premium, admin-editable) */}
-      <section className="py-20 md:py-24 bg-white">
-        <div className="container mx-auto px-4 max-w-content">
+      <section className="dark-section py-20 md:py-24">
+        <div className="container mx-auto px-4 max-w-content relative z-10">
           <div className="text-center mb-16 md:mb-20">
-            <h2 className="text-3xl md:text-4xl font-bold text-anthracite-900 mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
               Neden Bizi Seçmelisiniz?
             </h2>
-            <p className="text-lg text-anthracite-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
               Güvenilir çözüm ortağınız olmak için neler sunuyoruz
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {whyChooseUs.map((item, index) => (
-              <div key={index} className="group rounded-xl bg-anthracite-700 p-2 md:p-2.5 shadow-soft hover:shadow-card hover:-translate-y-0.5 transition-all duration-300">
-                <div className="bg-white rounded-lg overflow-hidden h-[240px] flex flex-col">
-                  <div className="bg-anthracite-800 px-4 py-3 flex items-center gap-3 shrink-0">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 shrink-0">
-                      <IconFromName name={item.icon} className="w-4 h-4 text-white" size={16} />
-                    </div>
-                    <h3 className="font-semibold text-white tracking-tight text-sm md:text-base">{item.title}</h3>
+              <div key={index} className="group rounded-xl bg-white/5 border border-white/10 p-6 hover:bg-white/[0.08] hover:border-white/20 hover:-translate-y-0.5 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 shrink-0">
+                    <IconFromName name={item.icon} className="w-4 h-4 text-white" size={16} />
                   </div>
-                  <div className="p-5 flex-1 min-h-0 overflow-auto">
-                    <p className="text-sm text-anthracite-600 leading-relaxed">{item.description}</p>
-                  </div>
-                  <div className="h-2 bg-anthracite-800 shrink-0" aria-hidden />
+                  <h3 className="font-semibold text-white tracking-tight text-sm md:text-base">{item.title}</h3>
                 </div>
+                <p className="text-sm text-gray-400 leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>

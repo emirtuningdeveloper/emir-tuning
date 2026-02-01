@@ -32,6 +32,7 @@ const defaultForm: Omit<SiteSettings, 'id' | 'updatedAt'> = {
     metaTitle: '',
     metaDescription: '',
     metaKeywords: '',
+    googleAnalyticsId: '',
   },
 }
 
@@ -79,6 +80,7 @@ export default function AdminAyarlarPage() {
               metaTitle: s.seoSettings?.metaTitle ?? '',
               metaDescription: s.seoSettings?.metaDescription ?? '',
               metaKeywords: s.seoSettings?.metaKeywords ?? '',
+              googleAnalyticsId: s.seoSettings?.googleAnalyticsId ?? '',
             },
           })
         }
@@ -123,7 +125,7 @@ export default function AdminAyarlarPage() {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4">
@@ -179,7 +181,7 @@ export default function AdminAyarlarPage() {
                       type="url"
                       value={form.logoUrl ?? ''}
                       onChange={(e) => setForm((f) => ({ ...f, logoUrl: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       placeholder="https://... logo görseli URL"
                     />
                     {(form.logoUrl ?? '').trim() && (
@@ -203,7 +205,7 @@ export default function AdminAyarlarPage() {
                       type="text"
                       value={form.siteName}
                       onChange={(e) => setForm((f) => ({ ...f, siteName: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       placeholder="Emir Tuning"
                     />
                   </div>
@@ -213,7 +215,7 @@ export default function AdminAyarlarPage() {
                       type="text"
                       value={form.siteDescription}
                       onChange={(e) => setForm((f) => ({ ...f, siteDescription: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       placeholder="Kısa açıklama"
                     />
                   </div>
@@ -222,7 +224,7 @@ export default function AdminAyarlarPage() {
                     <textarea
                       value={form.homepageText}
                       onChange={(e) => setForm((f) => ({ ...f, homepageText: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       rows={4}
                       placeholder="Anasayfada gösterilecek metin (isteğe bağlı)"
                     />
@@ -280,7 +282,7 @@ export default function AdminAyarlarPage() {
                           seoSettings: { ...f.seoSettings, metaTitle: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     />
                   </div>
                   <div>
@@ -293,7 +295,7 @@ export default function AdminAyarlarPage() {
                           seoSettings: { ...f.seoSettings, metaDescription: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       rows={2}
                     />
                   </div>
@@ -308,7 +310,7 @@ export default function AdminAyarlarPage() {
                           seoSettings: { ...f.seoSettings, metaKeywords: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       placeholder="virgülle ayırın"
                     />
                   </div>

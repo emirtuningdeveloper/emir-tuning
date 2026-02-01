@@ -45,7 +45,7 @@ export default function ReferanslarPage() {
       <Star
         key={index}
         className={`w-4 h-4 ${
-          index < rating ? 'text-amber-500 fill-amber-500' : 'text-anthracite-200'
+          index < rating ? 'text-amber-500 fill-amber-500' : 'text-white/20'
         }`}
       />
     ))
@@ -53,22 +53,25 @@ export default function ReferanslarPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12 max-w-content">
+      <div className="dark-section min-h-screen">
+        <div className="container mx-auto px-4 py-12 max-w-content relative z-10">
         <div className="text-center py-20">
           <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-anthracite-600 text-sm">Referanslar yükleniyor...</p>
+          <p className="text-gray-400 text-sm">Referanslar yükleniyor...</p>
+        </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12 max-w-content">
+    <div className="dark-section min-h-screen">
+      <div className="container mx-auto px-4 py-10 md:py-12 max-w-content relative z-10">
       <div className="text-center mb-10 md:mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-anthracite-900 mb-3 tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
           Referanslarımız
         </h1>
-        <p className="text-base text-anthracite-600 max-w-2xl mx-auto">
+        <p className="text-base text-gray-400 max-w-2xl mx-auto">
           Müşterilerimizin deneyimleri ve memnuniyetleri
         </p>
       </div>
@@ -80,12 +83,12 @@ export default function ReferanslarPage() {
 
       {/* Customer reviews – smaller, premium cards */}
       <div className="mb-12">
-        <h2 className="text-xl md:text-2xl font-bold text-anthracite-900 mb-6 tracking-tight text-center">
+        <h2 className="text-xl md:text-2xl font-bold text-white mb-6 tracking-tight text-center">
           Müşteri Yorumları
         </h2>
         {references.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl bg-anthracite-50/60 border border-anthracite-100">
-            <p className="text-anthracite-600 text-sm">
+          <div className="text-center py-16 rounded-2xl bg-white/5 border border-white/10">
+            <p className="text-gray-400 text-sm">
               Henüz referans eklenmemiş. Yakında burada olacak!
             </p>
           </div>
@@ -94,37 +97,37 @@ export default function ReferanslarPage() {
             {references.map((reference) => (
               <div
                 key={reference.id}
-                className="bg-white rounded-xl shadow-soft border border-anthracite-100 p-4 md:p-5 hover:shadow-card hover:border-anthracite-200/80 transition-all duration-300"
+                className="bg-white/5 rounded-xl border border-white/10 p-4 md:p-5 hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300"
               >
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-anthracite-50 border border-anthracite-100 flex items-center justify-center flex-shrink-0">
-                    <Quote className="w-5 h-5 text-anthracite-500" />
+                  <div className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    <Quote className="w-5 h-5 text-gray-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-anthracite-900 text-sm tracking-tight">
+                    <h3 className="font-semibold text-white text-sm tracking-tight">
                       {reference.customerName}
                     </h3>
                     {reference.vehicleModel && (
-                      <p className="text-xs text-anthracite-500 mt-0.5">{reference.vehicleModel}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{reference.vehicleModel}</p>
                     )}
                     {reference.service && (
-                      <p className="text-xs text-primary-600 mt-0.5">{reference.service}</p>
+                      <p className="text-xs text-primary-400 mt-0.5">{reference.service}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1 mb-2">
                   {renderStars(reference.rating)}
-                  <span className="text-xs text-anthracite-400 ml-1">
+                  <span className="text-xs text-gray-500 ml-1">
                     {reference.rating}/5
                   </span>
                 </div>
 
-                <p className="text-anthracite-600 text-sm leading-relaxed line-clamp-4">
+                <p className="text-gray-400 text-sm leading-relaxed line-clamp-4">
                   &quot;{reference.comment}&quot;
                 </p>
 
-                <div className="text-xs text-anthracite-400 border-t border-anthracite-100 pt-3 mt-3">
+                <div className="text-xs text-gray-500 border-t border-white/10 pt-3 mt-3">
                   {reference.date.toLocaleDateString('tr-TR', {
                     year: 'numeric',
                     month: 'short',
@@ -169,6 +172,7 @@ export default function ReferanslarPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

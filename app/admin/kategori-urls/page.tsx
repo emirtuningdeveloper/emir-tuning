@@ -125,7 +125,7 @@ export default function AdminKategoriYonetimiPage() {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4">
@@ -215,7 +215,7 @@ export default function AdminKategoriYonetimiPage() {
                           value={newPath}
                           onChange={(e) => setNewPath(e.target.value)}
                           placeholder="Boş bırakırsanız başlıktan üretilir"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900"
                         />
                       </div>
                       <div>
@@ -225,7 +225,7 @@ export default function AdminKategoriYonetimiPage() {
                           value={newTitle}
                           onChange={(e) => setNewTitle(e.target.value)}
                           placeholder="Örn. Body Kit Setler"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900"
                         />
                       </div>
                     </div>
@@ -271,7 +271,7 @@ export default function AdminKategoriYonetimiPage() {
                           type="text"
                           value={editTitle}
                           onChange={(e) => setEditTitle(e.target.value)}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900"
                         />
                       </div>
                     </div>

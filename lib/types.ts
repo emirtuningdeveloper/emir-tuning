@@ -123,6 +123,8 @@ export interface SiteSettings {
     metaTitle?: string
     metaDescription?: string
     metaKeywords?: string
+    /** Google Analytics 4 Measurement ID (G-XXXXXXXXXX) */
+    googleAnalyticsId?: string
   }
   updatedAt?: Date
 }

@@ -125,7 +125,7 @@ export default function AdminDuyurularPage() {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -235,7 +235,7 @@ export default function AdminDuyurularPage() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, type: e.target.value as 'banner' | 'popup' }))
                     }
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                   >
                     <option value="banner">{typeLabels.banner}</option>
                     <option value="popup">{typeLabels.popup}</option>
@@ -247,7 +247,7 @@ export default function AdminDuyurularPage() {
                     type="text"
                     value={form.title}
                     onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     placeholder="Kampanya başlığı"
                   />
                 </div>
@@ -256,7 +256,7 @@ export default function AdminDuyurularPage() {
                   <textarea
                     value={form.content}
                     onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                     rows={4}
                     placeholder="Duyuru metni..."
                   />
@@ -271,7 +271,7 @@ export default function AdminDuyurularPage() {
                         priority: e.target.value as 'high' | 'medium' | 'low',
                       }))
                     }
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                   >
                     <option value="high">Yüksek</option>
                     <option value="medium">Orta</option>
@@ -284,7 +284,7 @@ export default function AdminDuyurularPage() {
                     type="datetime-local"
                     value={form.expiresAt}
                     onChange={(e) => setForm((f) => ({ ...f, expiresAt: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                   />
                 </div>
                 <label className="flex items-center gap-2">

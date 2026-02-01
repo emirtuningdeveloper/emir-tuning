@@ -23,9 +23,9 @@ export default function ServiceCard({ service }: ServiceCardProps) {
   const IconComponent = serviceIcons[service.id] || Wrench
 
   return (
-    <div className="bg-white rounded-card-lg shadow-card border border-gray-100/80 overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300 group">
+    <div className="bg-white/5 rounded-card-lg border border-white/10 overflow-hidden hover:bg-white/[0.08] hover:border-white/20 hover:-translate-y-0.5 transition-all duration-300 group">
       {/* Image / Icon area */}
-      <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center overflow-hidden">
+      <div className="relative aspect-[16/9] w-full bg-white/5 flex items-center justify-center overflow-hidden">
         {service.imageUrl ? (
           <img
             src={service.imageUrl}
@@ -37,24 +37,24 @@ export default function ServiceCard({ service }: ServiceCardProps) {
             }}
           />
         ) : (
-          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/80 shadow-soft ring-2 ring-primary-100/50">
-            <IconComponent className="w-8 h-8 text-primary-600" />
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/10 ring-2 ring-white/20">
+            <IconComponent className="w-8 h-8 text-primary-400" />
           </div>
         )}
       </div>
       
       <div className="p-5 md:p-6">
         <div className="mb-3">
-          <span className="inline-block bg-primary-50 text-primary-700 text-xs font-medium px-2.5 py-1 rounded-chip border border-primary-100/80">
+          <span className="inline-block bg-white/10 text-gray-300 text-xs font-medium px-2.5 py-1 rounded-chip border border-white/10">
             {service.category}
           </span>
         </div>
         
-        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-snug tracking-tight">
+        <h3 className="text-lg font-semibold text-white mb-3 line-clamp-2 leading-snug tracking-tight">
           {service.name}
         </h3>
         
-        <p className="text-gray-600 text-sm leading-relaxed line-clamp-4">
+        <p className="text-gray-400 text-sm leading-relaxed line-clamp-4">
           {service.description}
         </p>
       </div>

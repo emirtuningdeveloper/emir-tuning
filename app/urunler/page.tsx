@@ -30,7 +30,6 @@ export default function UrunlerPage() {
   const [categories, setCategories] = useState<Category[]>(productCategories)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [featuredPaused, setFeaturedPaused] = useState(false)
   const featuredContainerRef = useRef<HTMLDivElement>(null)
   const featuredTrackRef = useRef<HTMLDivElement>(null)
   const featuredOffsetRef = useRef(0)
@@ -269,7 +268,7 @@ export default function UrunlerPage() {
       if (!track) return
       const dt = (now - last) / 1000
       last = now
-      if (!featuredPaused && !featuredAnimatingRef.current) {
+      if (!featuredAnimatingRef.current) {
         featuredOffsetRef.current += FEATURED_SCROLL_SPEED * dt
         const seg = featuredSegmentWidth
         while (featuredOffsetRef.current >= seg) featuredOffsetRef.current -= seg
@@ -279,7 +278,7 @@ export default function UrunlerPage() {
     }
     featuredRafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(featuredRafRef.current)
-  }, [featuredProducts.length, featuredPaused, featuredSegmentWidth])
+  }, [featuredProducts.length, featuredSegmentWidth])
 
   const featuredGoPrev = useCallback(() => {
     const track = featuredTrackRef.current
@@ -399,8 +398,6 @@ export default function UrunlerPage() {
           </div>
           <div
             className="relative overflow-hidden"
-            onMouseEnter={() => setFeaturedPaused(true)}
-            onMouseLeave={() => setFeaturedPaused(false)}
           >
             <div ref={featuredContainerRef} className="overflow-hidden">
               <div

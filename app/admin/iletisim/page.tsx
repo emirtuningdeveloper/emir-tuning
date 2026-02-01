@@ -74,7 +74,7 @@ export default function AdminIletisimPage() {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4">
@@ -107,7 +107,7 @@ export default function AdminIletisimPage() {
                       type="email"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       placeholder="info@emirtuning.com"
                     />
                   </div>
@@ -117,7 +117,7 @@ export default function AdminIletisimPage() {
                       type="text"
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       placeholder="+90 ..."
                     />
                   </div>
@@ -127,7 +127,7 @@ export default function AdminIletisimPage() {
                       type="text"
                       value={whatsappPhone}
                       onChange={(e) => setWhatsappPhone(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       placeholder="+90 545 761 54 94"
                     />
                   </div>
@@ -136,7 +136,7 @@ export default function AdminIletisimPage() {
                     <textarea
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       rows={3}
                       placeholder="Adres"
                     />
@@ -146,7 +146,7 @@ export default function AdminIletisimPage() {
                     <textarea
                       value={workingHours}
                       onChange={(e) => setWorkingHours(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                       rows={4}
                       placeholder={'Pazartesi - Cuma: 09:00 - 18:00\nCumartesi: 09:00 - 16:00\nPazar: Kapalı'}
                     />
@@ -168,7 +168,7 @@ export default function AdminIletisimPage() {
                         type="url"
                         value={socialMedia[key]}
                         onChange={(e) => setSocialMedia((s) => ({ ...s, [key]: e.target.value }))}
-                        className="w-full px-3 py-2 border rounded-lg"
+                        className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900"
                         placeholder={`https://${key}.com/...`}
                       />
                     </div>

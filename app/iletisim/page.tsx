@@ -68,12 +68,13 @@ export default function IletisimPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="dark-section min-h-screen">
+      <div className="container mx-auto px-4 py-12 relative z-10">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           İletişim
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-300 max-w-2xl mx-auto">
           Sorularınız, önerileriniz veya talepleriniz için bizimle iletişime geçin
         </p>
       </div>
@@ -81,45 +82,45 @@ export default function IletisimPage() {
       <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
         {/* İletişim Bilgileri */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">İletişim Bilgileri</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">İletişim Bilgileri</h2>
           
           <div className="space-y-6">
             {contactLoading ? (
               <div className="space-y-6 animate-pulse">
-                <div className="h-20 bg-gray-200 rounded-lg" />
-                <div className="h-20 bg-gray-200 rounded-lg" />
-                <div className="h-20 bg-gray-200 rounded-lg" />
-                <div className="h-24 bg-gray-200 rounded-lg mt-8" />
+                <div className="h-20 bg-white/10 rounded-lg" />
+                <div className="h-20 bg-white/10 rounded-lg" />
+                <div className="h-20 bg-white/10 rounded-lg" />
+                <div className="h-24 bg-white/10 rounded-lg mt-8" />
               </div>
             ) : (
               <>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-primary-600" />
+                  <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Adres</h3>
-                    <p className="text-gray-600 whitespace-pre-line">{contactInfo.address}</p>
+                    <h3 className="font-semibold text-white mb-1">Adres</h3>
+                    <p className="text-gray-300 whitespace-pre-line">{contactInfo.address}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-6 h-6 text-primary-600" />
+                  <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-6 h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Telefon</h3>
-                    <p className="text-gray-600">{contactInfo.phone}</p>
+                    <h3 className="font-semibold text-white mb-1">Telefon</h3>
+                    <p className="text-gray-300">{contactInfo.phone}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-primary-600" />
+                  <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">E-posta</h3>
-                    <p className="text-gray-600">{contactInfo.email}</p>
+                    <h3 className="font-semibold text-white mb-1">E-posta</h3>
+                    <p className="text-gray-300">{contactInfo.email}</p>
                   </div>
                 </div>
               </>
@@ -127,9 +128,9 @@ export default function IletisimPage() {
           </div>
 
           {!contactLoading && (
-            <div className="mt-8 p-6 bg-primary-50 rounded-lg">
-              <h3 className="font-semibold text-gray-900 mb-2">Çalışma Saatleri</h3>
-              <div className="space-y-1 text-gray-600">
+            <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-lg">
+              <h3 className="font-semibold text-white mb-2">Çalışma Saatleri</h3>
+              <div className="space-y-1 text-gray-300">
                 {contactInfo.workingHours.map((line, i) => (
                   <p key={i}>{line}</p>
                 ))}
@@ -140,18 +141,18 @@ export default function IletisimPage() {
 
         {/* İletişim Formu */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Bize Ulaşın</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Bize Ulaşın</h2>
           
           {isSubmitted && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <p className="text-green-800">Mesajınız başarıyla gönderildi!</p>
+            <div className="mb-6 p-4 bg-green-500/20 border border-green-500/40 rounded-lg flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <p className="text-green-300">Mesajınız başarıyla gönderildi!</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
                 Ad Soyad *
               </label>
               <input
@@ -161,12 +162,12 @@ export default function IletisimPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
                 E-posta *
               </label>
               <input
@@ -176,12 +177,12 @@ export default function IletisimPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
                 Telefon
               </label>
               <input
@@ -190,12 +191,12 @@ export default function IletisimPage() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
 
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-1">
                 Konu *
               </label>
               <select
@@ -204,7 +205,7 @@ export default function IletisimPage() {
                 value={formData.subject}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 contact-select"
               >
                 <option value="">Konu seçiniz</option>
                 <option value="urun">Ürün Hakkında</option>
@@ -216,7 +217,7 @@ export default function IletisimPage() {
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-1">
                 Mesajınız *
               </label>
               <textarea
@@ -226,14 +227,14 @@ export default function IletisimPage() {
                 onChange={handleChange}
                 required
                 rows={5}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
+                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -249,6 +250,7 @@ export default function IletisimPage() {
             </button>
           </form>
         </div>
+      </div>
       </div>
     </div>
   )

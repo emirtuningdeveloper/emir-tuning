@@ -140,15 +140,15 @@ export default function UrunlerCategoryPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb + ürün sayısı tek satırda */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <nav className="flex items-center gap-2 text-sm text-gray-600">
-          <Link href="/" className="hover:text-primary-600">Ana Sayfa</Link>
-          <ChevronRight className="w-4 h-4" />
-          <Link href="/urunler" className="hover:text-primary-600">Ürünler</Link>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900 font-bold underline">{categoryTitle}</span>
+        <nav className="flex items-center gap-2 text-sm text-gray-300">
+          <Link href="/" className="hover:text-white">Ana Sayfa</Link>
+          <ChevronRight className="w-4 h-4 text-gray-500" />
+          <Link href="/urunler" className="hover:text-white">Ürünler</Link>
+          <ChevronRight className="w-4 h-4 text-gray-500" />
+          <span className="text-white font-bold underline">{categoryTitle}</span>
         </nav>
         {!loading && !error && products.length > 0 && (
-          <p className="text-gray-900 font-bold shrink-0 text-sm">{products.length} ürün listeleniyor</p>
+          <p className="text-gray-300 font-bold shrink-0 text-sm">{products.length} ürün listeleniyor</p>
         )}
       </div>
 

@@ -105,14 +105,14 @@ export default function Navbar() {
                         }}
                       >
                         <div 
-                          className="bg-white rounded-card-lg shadow-dropdown border border-gray-100 overflow-hidden"
+                          className="bg-[#1a1a1a] rounded-card-lg shadow-dropdown border border-white/10 overflow-hidden"
                           style={{ width: '1000px', maxHeight: '85vh' }}
                         >
                           <div className="flex h-full">
                             {/* Sol - Ana kategoriler */}
-                            <div className="w-56 border-r border-gray-100 bg-gray-50/80">
+                            <div className="w-56 border-r border-white/10 bg-black/30">
                               <div className="px-4 py-3 bg-anthracite-900">
-                                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-300">Kategoriler</h3>
+                                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Kategoriler</h3>
                               </div>
                               <div className="overflow-y-auto" style={{ maxHeight: 'calc(85vh - 52px)' }}>
                                 {productCategoriesList.map((category) => (
@@ -121,10 +121,10 @@ export default function Navbar() {
                                     onMouseEnter={() => setHoveredCategory(category.slug)}
                                     className={`px-4 py-2.5 text-sm transition-colors duration-150 cursor-pointer border-l-2 ${
                                       hoveredCategory === category.slug
-                                        ? 'bg-white text-primary-600 font-semibold border-primary-600'
+                                        ? 'bg-white/10 text-primary-400 font-semibold border-primary-500'
                                         : pathname === `/urunler/${category.slug}` || pathname.startsWith(`/urunler/${category.slug}/`)
-                                        ? 'bg-white text-primary-600 border-primary-500'
-                                        : 'text-gray-700 hover:bg-white hover:text-primary-600 border-transparent'
+                                        ? 'bg-white/5 text-primary-400 border-primary-600'
+                                        : 'text-gray-300 hover:bg-white/5 hover:text-primary-400 border-transparent'
                                     }`}
                                   >
                                     <Link 
@@ -152,7 +152,7 @@ export default function Navbar() {
 
                               return (
                                 <div className="flex-1 px-6 py-5 overflow-y-auto" style={{ maxHeight: '85vh' }}>
-                                  <h4 className="text-base font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 tracking-tight">
+                                  <h4 className="text-base font-bold text-white mb-4 pb-2 border-b border-white/10 tracking-tight">
                                     {selectedCategory.title}
                                   </h4>
                                   <div className="grid grid-cols-3 gap-x-10 gap-y-1">
@@ -166,8 +166,8 @@ export default function Navbar() {
                                               className={`block py-1.5 text-sm font-medium transition-colors duration-150 ${
                                                 pathname === `/urunler/${selectedCategory.slug}/${subCategory.slug}` || 
                                                 pathname.startsWith(`/urunler/${selectedCategory.slug}/${subCategory.slug}/`)
-                                                  ? 'text-primary-600'
-                                                  : 'text-gray-800 hover:text-primary-600'
+                                                  ? 'text-primary-400'
+                                                  : 'text-gray-300 hover:text-primary-400'
                                               }`}
                                             >
                                               {subCategory.title}
@@ -182,8 +182,8 @@ export default function Navbar() {
                                                     className={`block py-1 text-xs transition-colors duration-150 pl-2 ${
                                                       pathname === `/urunler/${selectedCategory.slug}/${subCategory.slug}/${subSubCategory.slug}` ||
                                                       pathname.startsWith(`/urunler/${selectedCategory.slug}/${subCategory.slug}/${subSubCategory.slug}/`)
-                                                        ? 'text-primary-600 font-medium'
-                                                        : 'text-gray-600 hover:text-primary-600'
+                                                        ? 'text-primary-400 font-medium'
+                                                        : 'text-gray-500 hover:text-primary-400'
                                                     }`}
                                                   >
                                                     • {subSubCategory.title}
@@ -202,7 +202,7 @@ export default function Navbar() {
                             
                             {!hoveredCategory && (
                               <div className="flex-1 px-6 py-5 flex items-center justify-center" style={{ maxHeight: '85vh' }}>
-                                <p className="text-sm text-gray-400">Bir kategori seçin</p>
+                                <p className="text-sm text-gray-500">Bir kategori seçin</p>
                               </div>
                             )}
                           </div>

@@ -7,7 +7,7 @@ import { ChevronLeft, Network } from 'lucide-react'
 export default function AdminApiYonetimiPage() {
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4">

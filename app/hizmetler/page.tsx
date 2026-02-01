@@ -220,19 +220,20 @@ export default function HizmetlerPage() {
   }, [loading])
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="dark-section min-h-screen">
+      <div className="container mx-auto px-4 py-12 relative z-10">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Hizmetlerimiz
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-400 max-w-2xl mx-auto">
           Profesyonel tuning hizmetlerimizle araçlarınıza değer katın
         </p>
       </div>
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-600">Hizmetler yükleniyor...</p>
+          <p className="text-gray-400">Hizmetler yükleniyor...</p>
         </div>
       ) : (
         <>
@@ -244,6 +245,7 @@ export default function HizmetlerPage() {
           </div>
         </>
       )}
+      </div>
     </div>
   )
 }

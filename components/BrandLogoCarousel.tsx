@@ -67,7 +67,6 @@ export default function BrandLogoCarousel() {
   const [loading, setLoading] = useState(() => cachedBrandLogos.length === 0)
   const [apiError, setApiError] = useState<string | null>(null)
   const [itemWidth, setItemWidth] = useState(200)
-  const [paused, setPaused] = useState(false)
   const [urlVersion] = useState(() => Date.now())
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -142,7 +141,7 @@ export default function BrandLogoCarousel() {
       if (!track) return
       const dt = (now - last) / 1000
       last = now
-      if (!paused && !isButtonAnimatingRef.current && segmentWidthRef.current > 0) {
+      if (!isButtonAnimatingRef.current && segmentWidthRef.current > 0) {
         offsetRef.current += SCROLL_SPEED * dt
         const seg = segmentWidthRef.current
         while (offsetRef.current >= seg) offsetRef.current -= seg
@@ -152,7 +151,7 @@ export default function BrandLogoCarousel() {
     }
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
-  }, [logos.length, paused])
+  }, [logos.length])
 
   const ANIM_MS = 600
 
@@ -190,7 +189,7 @@ export default function BrandLogoCarousel() {
   if (loading) {
     return (
       <div className="w-full max-w-content mx-auto py-8 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-anthracite-300 border-t-primary-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-white/20 border-t-primary-500 rounded-full animate-spin" />
       </div>
     )
   }
@@ -198,21 +197,21 @@ export default function BrandLogoCarousel() {
   if (logos.length === 0) {
     return (
       <div className="w-full max-w-content mx-auto py-10 px-6 text-center">
-        <p className="text-anthracite-600 text-sm md:text-base leading-relaxed max-w-xl mx-auto">
+        <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mx-auto">
           {apiError ? (
             <>
               Marka logoları yüklenemedi:{' '}
-              <span className="text-red-600 font-medium">{apiError}</span>
+              <span className="text-red-400 font-medium">{apiError}</span>
               <br />
-              <span className="text-anthracite-500 text-xs mt-2 block">
+              <span className="text-gray-500 text-xs mt-2 block">
                 Vercel env değişkenlerini kontrol edin. GOOGLE_PRIVATE_KEY formatı özellikle önemli (tek satır, \\n ile).
               </span>
             </>
           ) : (
             <>
               Marka logoları burada görünecek.{' '}
-              <span className="text-anthracite-500">
-                <code className="bg-white/80 px-1.5 py-0.5 rounded text-xs">GOOGLE_DRIVE_BRANDS_FOLDER_ID</code> değerini ekleyin.
+              <span className="text-gray-500">
+                <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs">GOOGLE_DRIVE_BRANDS_FOLDER_ID</code> değerini ekleyin.
               </span>
             </>
           )}
@@ -226,8 +225,6 @@ export default function BrandLogoCarousel() {
   return (
     <div
       className="relative w-full max-w-content mx-auto overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
     >
       <div ref={containerRef} className="overflow-hidden">
         <div ref={trackRef} className="flex will-change-transform">
@@ -251,7 +248,7 @@ export default function BrandLogoCarousel() {
         <button
           type="button"
           onClick={goPrev}
-          className="w-9 h-9 rounded-full border border-anthracite-200 bg-white flex items-center justify-center text-anthracite-600 hover:bg-anthracite-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="w-9 h-9 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           aria-label="Önceki markalar"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -259,7 +256,7 @@ export default function BrandLogoCarousel() {
         <button
           type="button"
           onClick={goNext}
-          className="w-9 h-9 rounded-full border border-anthracite-200 bg-white flex items-center justify-center text-anthracite-600 hover:bg-anthracite-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="w-9 h-9 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           aria-label="Sonraki markalar"
         >
           <ChevronRight className="w-5 h-5" />
