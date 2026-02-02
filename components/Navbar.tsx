@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import NavbarLogo from './NavbarLogo'
-import { productCategories, Category } from '@/lib/product-categories'
+import { productCategories, Category, formatCategoryLabel } from '@/lib/product-categories'
 
 interface SubMenuItem {
   href: string
@@ -43,10 +43,10 @@ export default function Navbar() {
     }
   }, [showProductsMenu, hoveredCategory, productCategoriesList])
 
-  // Ürünler dropdown menüsü için kategorileri hazırla
+  // Ürünler dropdown menüsü için kategorileri hazırla (tireleri kaldır: body-kit-uruneri → Body Kit Uruneri)
   const productSubmenu: SubMenuItem[] = productCategoriesList.map((category) => ({
     href: `/urunler/${category.slug}`,
-    label: category.title,
+    label: formatCategoryLabel(category.title ?? category.slug),
   }))
 
   const navItems: NavItem[] = [
@@ -132,7 +132,7 @@ export default function Navbar() {
                                       onClick={() => setShowProductsMenu(false)}
                                       className="block"
                                     >
-                                      {category.title}
+                                      {formatCategoryLabel(category.title ?? category.slug)}
                                     </Link>
                                   </div>
                                 ))}
@@ -153,7 +153,7 @@ export default function Navbar() {
                               return (
                                 <div className="flex-1 px-6 py-5 overflow-y-auto" style={{ maxHeight: '85vh' }}>
                                   <h4 className="text-base font-bold text-white mb-4 pb-2 border-b border-white/10 tracking-tight">
-                                    {selectedCategory.title}
+                                    {formatCategoryLabel(selectedCategory.title ?? selectedCategory.slug)}
                                   </h4>
                                   <div className="grid grid-cols-3 gap-x-10 gap-y-1">
                                     {columns.map((column, colIndex) => (
@@ -170,7 +170,7 @@ export default function Navbar() {
                                                   : 'text-gray-300 hover:text-primary-400'
                                               }`}
                                             >
-                                              {subCategory.title}
+                                              {formatCategoryLabel(subCategory.title ?? subCategory.slug)}
                                             </Link>
                                             {subCategory.children && subCategory.children.length > 0 && (
                                               <div className="ml-0 mt-1 space-y-0.5">
@@ -186,7 +186,7 @@ export default function Navbar() {
                                                         : 'text-gray-500 hover:text-primary-400'
                                                     }`}
                                                   >
-                                                    • {subSubCategory.title}
+                                                    • {formatCategoryLabel(subSubCategory.title ?? subSubCategory.slug)}
                                                   </Link>
                                                 ))}
                                               </div>

@@ -610,6 +610,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
           instagram: '',
           twitter: '',
           youtube: '',
+          tiktok: '',
         },
         seoSettings: {
           metaTitle: '',

@@ -8,7 +8,7 @@ import { fetchCarPartsProducts, CarPartsProduct } from '@/lib/carparts-client'
 import { getProxiedImageUrl } from '@/lib/image-proxy'
 import ProductCard from '@/components/ProductCard'
 import { Product } from '@/lib/types'
-import { productCategories, Category } from '@/lib/product-categories'
+import { productCategories, Category, formatCategoryLabel } from '@/lib/product-categories'
 import { Loader2, ChevronLeft, ChevronRight, Package, Folder } from 'lucide-react'
 
 /** En çok satanlar slider: otomatik yavaş kayma, alt tuşlar, akıcı geçiş (px/s). Kart ~260px + gap 20px */
@@ -347,20 +347,24 @@ export default function UrunlerPage() {
     )
   }
 
+  /** Kategori başlığı: tireleri kaldır, kelimeler arası boşluk (body-kit-urunleri → Body Kit Uruneri) */
+  const categoryDisplayTitle = (category: Category) =>
+    formatCategoryLabel((category.title ?? category.slug ?? '').trim())
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Ürünlerimiz
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-300 max-w-2xl mx-auto">
           Tuning dünyasının en kaliteli ürünlerini keşfedin
         </p>
       </div>
 
       {/* Product Categories */}
       <div className="mb-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
           Ürün Kategorileri
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -373,7 +377,7 @@ export default function UrunlerPage() {
               <div className="flex items-center space-x-3 mb-2">
                 <Folder className="w-5 h-5 text-primary-600 group-hover:text-primary-700" />
                 <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600">
-                  {category.title}
+                  {categoryDisplayTitle(category)}
                 </h3>
               </div>
               {category.children && category.children.length > 0 && (
@@ -392,7 +396,7 @@ export default function UrunlerPage() {
       {featuredProducts.length > 0 && (
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-anthracite-900 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
               En çok satanlar
             </h2>
           </div>
@@ -440,7 +444,7 @@ export default function UrunlerPage() {
 
       {products.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-anthracite-600 text-lg">
+          <p className="text-gray-400 text-lg">
             Henüz ürün eklenmemiş. Yakında burada olacak!
           </p>
         </div>
@@ -451,12 +455,12 @@ export default function UrunlerPage() {
             .filter(cat => cat !== 'Body Kits')
             .map((categoryName) => (
               <div key={categoryName}>
-                <div className="flex items-center justify-between mb-8 border-b border-anthracite-200 pb-2">
-                  <h2 className="text-2xl md:text-3xl font-bold text-anthracite-900 tracking-tight">
+                <div className="flex items-center justify-between mb-8 border-b border-white/20 pb-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
                     {categoryName}
                   </h2>
                   {productsByCategory[categoryName] && productsByCategory[categoryName].length > 0 && (
-                    <p className="text-anthracite-600 text-sm">
+                    <p className="text-gray-400 text-sm">
                       {productsByCategory[categoryName].length} ürün gösteriliyor
                     </p>
                   )}

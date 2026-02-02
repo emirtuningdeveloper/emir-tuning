@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { getProxiedImageUrl } from '@/lib/image-proxy'
 
 export interface BrandLogoItem {
   id: string
@@ -12,7 +13,7 @@ export interface BrandLogoItem {
 /** Modül seviyesi önbellek: yeniden mount'ta görseller kaybolmasın */
 let cachedBrandLogos: BrandLogoItem[] = []
 
-/** Tek logo: yüklenmezse birkaç kez yeniden dener */
+/** Tek logo: proxy üzerinden yüklenir (deploy sonrası Drive CORS/block sorununu önler), yüklenmezse retry */
 function LogoImage({
   item,
   urlVersion,
@@ -23,8 +24,8 @@ function LogoImage({
   alt: string
 }) {
   const [retry, setRetry] = useState(0)
-  const baseUrl = `${item.publicUrl}${item.publicUrl.includes('?') ? '&' : '?'}v=${urlVersion}`
-  const src = retry > 0 ? `${baseUrl}&r=${retry}` : baseUrl
+  const rawUrl = `${item.publicUrl}${item.publicUrl.includes('?') ? '&' : '?'}v=${urlVersion}${retry > 0 ? `&r=${retry}` : ''}`
+  const src = getProxiedImageUrl(rawUrl)
 
   const handleError = () => {
     if (retry < 2) setRetry((r) => r + 1)

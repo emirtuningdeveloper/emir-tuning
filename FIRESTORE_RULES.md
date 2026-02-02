@@ -51,6 +51,13 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+    
+    // Bize Ulaşın formu: herkes talep oluşturabilir; sadece giriş yapmış admin okuyabilir (Talepler sayfası)
+    match /contactRequests/{document=**} {
+      allow create: if true;
+      allow read: if request.auth != null;
+      allow update, delete: if request.auth != null;
+    }
   }
 }
 ```

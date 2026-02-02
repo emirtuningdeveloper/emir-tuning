@@ -1,4 +1,5 @@
 import { Product } from '@/lib/types'
+import { formatCategoryLabel } from '@/lib/product-categories'
 import { Package } from 'lucide-react'
 
 interface ProductCardProps {
@@ -8,11 +9,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, variant = 'default' }: ProductCardProps) {
-  // Kategori yolu "Ana > Alt > Son" ise sadece son kısmı göster (örn. "Body Kit Setler")
-  const displayCategory =
+  // Kategori yolu "Ana > Alt > Son" ise sadece son kısmı göster; tireleri kaldır (body-kit-urunleri → Body Kit Uruneri)
+  const rawCategory =
     product.category && product.category.includes(' > ')
       ? product.category.split(' > ').pop()?.trim() || product.category
       : product.category
+  const displayCategory = formatCategoryLabel(rawCategory || '')
 
   const isSlider = variant === 'slider'
 

@@ -3,7 +3,7 @@
 import AdminRoute from '@/components/AdminRoute'
 import { useRouter } from 'next/navigation'
 import { logoutAdmin, getCurrentUser } from '@/lib/auth'
-import { Package, Settings, LogOut, Link as LinkIcon, Wrench, Bell, MessageSquare, BarChart3, Network, Phone, BookOpen } from 'lucide-react'
+import { Package, Settings, LogOut, Link as LinkIcon, Wrench, Bell, MessageSquare, BarChart3, Network, Phone, BookOpen, Inbox } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { User } from 'firebase/auth'
@@ -158,6 +158,22 @@ export default function AdminDashboard() {
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">API Yönetimi</h2>
                   <p className="text-sm text-gray-600">Harici API&apos;leri yönet ve izle</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Talepler */}
+            <Link
+              href="/admin/talepler"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center">
+                  <Inbox className="w-6 h-6 text-rose-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Talepler</h2>
+                  <p className="text-sm text-gray-600">Bize Ulaşın formundan gelen talepler</p>
                 </div>
               </div>
             </Link>

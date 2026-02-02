@@ -27,6 +27,7 @@ const defaultForm: Omit<SiteSettings, 'id' | 'updatedAt'> = {
     instagram: '',
     twitter: '',
     youtube: '',
+    tiktok: '',
   },
   seoSettings: {
     metaTitle: '',
@@ -75,6 +76,7 @@ export default function AdminAyarlarPage() {
               instagram: s.socialMedia?.instagram ?? '',
               twitter: s.socialMedia?.twitter ?? '',
               youtube: s.socialMedia?.youtube ?? '',
+              tiktok: s.socialMedia?.tiktok ?? '',
             },
             seoSettings: {
               metaTitle: s.seoSettings?.metaTitle ?? '',

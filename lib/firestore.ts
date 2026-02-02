@@ -1,6 +1,6 @@
-import { collection, getDocs, query, orderBy, where, doc, getDoc } from 'firebase/firestore'
+import { collection, getDocs, query, orderBy, where, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore'
 import { getDb } from './firebase'
-import { Product, Service, Review, Announcement, SiteSettings } from './types'
+import { Product, Service, Review, Announcement, SiteSettings, ContactRequest } from './types'
 
 export async function getProducts(): Promise<Product[]> {
   try {
@@ -243,5 +243,53 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
   } catch (error) {
     console.error('Error fetching site settings:', error)
     return null
+  }
+}
+
+/** Bize Ulaşın formu talebini kaydet (contactRequests koleksiyonu) */
+export async function addContactRequest(data: Omit<ContactRequest, 'id' | 'createdAt'>): Promise<string> {
+  const db = getDb()
+  const ref = collection(db, 'contactRequests')
+  const docRef = await addDoc(ref, {
+    ...data,
+    createdAt: serverTimestamp(),
+  })
+  return docRef.id
+}
+
+/** Tüm iletişim taleplerini getir (admin Talepler sayfası; sadece giriş yapan admin okuyabilir - Firestore kuralları) */
+export async function getContactRequests(): Promise<ContactRequest[]> {
+  try {
+    const db = getDb()
+    const ref = collection(db, 'contactRequests')
+    let snapshot
+    try {
+      const q = query(ref, orderBy('createdAt', 'desc'))
+      snapshot = await getDocs(q)
+    } catch (orderError: unknown) {
+      const err = orderError as { code?: string }
+      if (err?.code === 'failed-precondition') {
+        snapshot = await getDocs(ref)
+      } else {
+        throw orderError
+      }
+    }
+    const list = snapshot.docs.map(d => {
+      const x = d.data()
+      return {
+        id: d.id,
+        name: x.name ?? '',
+        email: x.email ?? '',
+        phone: x.phone ?? '',
+        subject: x.subject ?? '',
+        message: x.message ?? '',
+        createdAt: x.createdAt?.toDate?.() || new Date(),
+      } as ContactRequest
+    })
+    list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    return list
+  } catch (error) {
+    console.error('Error fetching contact requests:', error)
+    return []
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react'
-import { getSiteSettings } from '@/lib/firestore'
+import { getSiteSettings, addContactRequest } from '@/lib/firestore'
 
 const DEFAULT_ADDRESS = 'Tuning Merkezi\nİstanbul, Türkiye'
 const DEFAULT_PHONE = '+90 (XXX) XXX XX XX'
@@ -44,20 +44,25 @@ export default function IletisimPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.phone?.trim()) return
     setIsSubmitting(true)
-
-    // Simüle edilmiş form gönderimi
-    // Gerçek uygulamada burada bir API endpoint'ine istek gönderilir
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      await addContactRequest({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      })
       setIsSubmitted(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
-      
-      // 3 saniye sonra mesajı kaldır
-      setTimeout(() => {
-        setIsSubmitted(false)
-      }, 3000)
-    }, 1000)
+      setTimeout(() => setIsSubmitted(false), 5000)
+    } catch (err) {
+      console.error('Talep gönderilemedi:', err)
+      alert('Mesajınız gönderilemedi. Lütfen tekrar deneyin.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -183,7 +188,7 @@ export default function IletisimPage() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
-                Telefon
+                Telefon *
               </label>
               <input
                 type="tel"
@@ -191,6 +196,7 @@ export default function IletisimPage() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                required
                 className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>

@@ -90,6 +90,17 @@ export interface AboutValueItem {
   icon: string
 }
 
+/** Bize Ulaşın formundan gelen talep (admin Talepler sayfasında listelenir) */
+export interface ContactRequest {
+  id?: string
+  name: string
+  email: string
+  phone: string
+  subject: string
+  message: string
+  createdAt: Date
+}
+
 /** Site genel ayarları */
 export interface SiteSettings {
   id?: string
@@ -118,6 +129,7 @@ export interface SiteSettings {
     instagram?: string
     twitter?: string
     youtube?: string
+    tiktok?: string
   }
   seoSettings?: {
     metaTitle?: string

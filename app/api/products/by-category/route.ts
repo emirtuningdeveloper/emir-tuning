@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import * as cheerio from 'cheerio'
 import { getDrstuningCategoryUrl } from '@/lib/drstuning'
 import { getProductsByCategoryServer } from '@/lib/firebase-admin-server'
+import { getAllProductOverrides } from '@/lib/firestore-admin'
 
 export interface ByCategoryProduct {
   id: string
@@ -171,12 +172,37 @@ export async function GET(request: Request) {
     const pageProducts = unique.slice(0, 100)
 
     const allPages = searchParams.get('allPages') === 'true'
+    let overridesMap: Record<string, { name?: string; imageUrl?: string }> = {}
+    try {
+      const overrides = await getAllProductOverrides()
+      overrides.forEach((o) => {
+        if (o.productId && (o.name != null || o.imageUrl != null)) {
+          overridesMap[o.productId] = {}
+          if (o.name != null) overridesMap[o.productId].name = o.name
+          if (o.imageUrl != null) overridesMap[o.productId].imageUrl = o.imageUrl
+        }
+      })
+    } catch {
+      /* ignore */
+    }
+    const applyOverrides = (list: ByCategoryProduct[]) =>
+      list.map((p) => {
+        const ov = overridesMap[p.id]
+        if (!ov) return p
+        return {
+          ...p,
+          name: ov.name ?? p.name,
+          imageUrl: ov.imageUrl ?? p.imageUrl,
+        }
+      })
+
     if (!allPages) {
       const merged = page === 1 ? [...firestoreProducts, ...pageProducts] : pageProducts
+      const withOverrides = applyOverrides(merged)
       return NextResponse.json({
         success: true,
-        products: merged,
-        totalCount: merged.length,
+        products: withOverrides,
+        totalCount: withOverrides.length,
         source: firestoreProducts.length > 0 ? 'Firestore + DRS Tuning' : 'DRS Tuning',
       })
     }
@@ -250,10 +276,11 @@ export async function GET(request: Request) {
       allProducts.push(...nextUnique)
     }
 
+    const withOverrides = applyOverrides(allProducts)
     return NextResponse.json({
       success: true,
-      products: allProducts,
-      totalCount: allProducts.length,
+      products: withOverrides,
+      totalCount: withOverrides.length,
       source: 'DRS Tuning',
     })
   } catch (err: unknown) {

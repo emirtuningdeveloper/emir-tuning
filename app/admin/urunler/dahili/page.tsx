@@ -2,11 +2,14 @@
 
 import AdminRoute from '@/components/AdminRoute'
 import Link from 'next/link'
-import { ChevronLeft, Package, Loader2, Search } from 'lucide-react'
+import { ChevronLeft, Package, Loader2, Search, Pencil, X, Save } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { buildCategoriesFromFlat, getCategoryPathsGrouped } from '@/lib/product-categories'
+import { getProxiedImageUrl } from '@/lib/image-proxy'
 
 type ByCategoryProduct = { id: string; name: string; imageUrl: string; productUrl?: string }
+
+type OverrideMap = Record<string, { name?: string; imageUrl?: string }>
 
 export default function DahiliUrunYonetimiPage() {
   const [categoryItems, setCategoryItems] = useState<{ path: string; title: string }[]>([])
@@ -20,6 +23,11 @@ export default function DahiliUrunYonetimiPage() {
   const [categorySearch, setCategorySearch] = useState('')
   const [outOfStockIds, setOutOfStockIds] = useState<Set<string>>(new Set())
   const [togglingStock, setTogglingStock] = useState<string | null>(null)
+  const [overrides, setOverrides] = useState<OverrideMap>({})
+  const [editingProduct, setEditingProduct] = useState<ByCategoryProduct | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editImageUrl, setEditImageUrl] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
 
   const filteredCategoryOptions = useMemo(() => {
     const q = categorySearch.trim().toLowerCase()
@@ -68,8 +76,31 @@ export default function DahiliUrunYonetimiPage() {
     }
   }
 
+  const loadOverrides = async () => {
+    try {
+      const res = await fetch('/api/admin/products/overrides')
+      const data = await res.json()
+      if (!data.success || !Array.isArray(data.overrides)) return
+      const map: OverrideMap = {}
+      for (const o of data.overrides) {
+        if (o.productId) {
+          map[o.productId] = {}
+          if (o.name != null) map[o.productId].name = o.name
+          if (o.imageUrl != null) map[o.productId].imageUrl = o.imageUrl
+        }
+      }
+      setOverrides(map)
+    } catch {
+      setOverrides({})
+    }
+  }
+
   useEffect(() => {
     loadOutOfStock()
+  }, [])
+
+  useEffect(() => {
+    loadOverrides()
   }, [])
 
   const handleFetchProducts = async () => {
@@ -111,6 +142,49 @@ export default function DahiliUrunYonetimiPage() {
       })
     } finally {
       setTogglingStock(null)
+    }
+  }
+
+  const openEdit = (p: ByCategoryProduct) => {
+    setEditingProduct(p)
+    setEditName(overrides[p.id]?.name ?? p.name)
+    setEditImageUrl(overrides[p.id]?.imageUrl ?? p.imageUrl ?? '')
+  }
+
+  const closeEdit = () => {
+    setEditingProduct(null)
+    setEditName('')
+    setEditImageUrl('')
+  }
+
+  const saveEdit = async () => {
+    if (!editingProduct) return
+    setSavingEdit(true)
+    try {
+      const res = await fetch('/api/admin/products/overrides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: editingProduct.id,
+          name: editName.trim() || undefined,
+          imageUrl: editImageUrl.trim() || undefined,
+          outOfStock: outOfStockIds.has(editingProduct.id),
+        }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error || 'Kaydedilemedi')
+      setOverrides((prev) => ({
+        ...prev,
+        [editingProduct.id]: {
+          name: editName.trim() || undefined,
+          imageUrl: editImageUrl.trim() || undefined,
+        },
+      }))
+      closeEdit()
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Kaydedilemedi')
+    } finally {
+      setSavingEdit(false)
     }
   }
 
@@ -225,17 +299,20 @@ export default function DahiliUrunYonetimiPage() {
                       <th className="px-4 py-2 text-sm font-medium text-gray-700">Görsel</th>
                       <th className="px-4 py-2 text-sm font-medium text-gray-700">Ürün adı</th>
                       <th className="px-4 py-2 text-sm font-medium text-gray-700">Stok</th>
+                      <th className="px-4 py-2 text-sm font-medium text-gray-700 w-24">İşlem</th>
                     </tr>
                   </thead>
                   <tbody>
                     {products.map((p) => {
                       const isOut = outOfStockIds.has(p.id)
+                      const displayName = overrides[p.id]?.name ?? p.name
+                      const displayImageUrl = overrides[p.id]?.imageUrl ?? p.imageUrl
                       return (
                         <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50/50">
                           <td className="px-4 py-2">
-                            {p.imageUrl ? (
+                            {displayImageUrl ? (
                               <img
-                                src={p.imageUrl}
+                                src={getProxiedImageUrl(displayImageUrl)}
                                 alt=""
                                 className="w-12 h-12 object-cover rounded"
                               />
@@ -250,7 +327,7 @@ export default function DahiliUrunYonetimiPage() {
                               rel="noopener noreferrer"
                               className="text-primary-600 hover:underline truncate max-w-xs block"
                             >
-                              {p.name}
+                              {displayName}
                             </a>
                           </td>
                           <td className="px-4 py-2">
@@ -267,11 +344,93 @@ export default function DahiliUrunYonetimiPage() {
                               {togglingStock === p.id ? '...' : isOut ? 'Tükendi' : 'Stokta'}
                             </button>
                           </td>
+                          <td className="px-4 py-2">
+                            <button
+                              type="button"
+                              onClick={() => openEdit(p)}
+                              className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-primary-600 px-2 py-1 rounded hover:bg-primary-50"
+                              title="Düzenle"
+                            >
+                              <Pencil className="w-4 h-4" />
+                              Düzenle
+                            </button>
+                          </td>
                         </tr>
                       )
                     })}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Düzenleme paneli: sol ürün adı, sağda üstte görsel altında görsel linki */}
+            {editingProduct && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900">Ürünü düzenle</h3>
+                    <button
+                      type="button"
+                      onClick={closeEdit}
+                      className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
+                      aria-label="Kapat"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Ürün adı</label>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Ürün adı"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Ürün görseli</label>
+                      {editImageUrl ? (
+                        <img
+                          src={getProxiedImageUrl(editImageUrl)}
+                          alt="Önizleme"
+                          className="w-full aspect-video object-contain bg-gray-100 rounded-lg mb-3 border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-full aspect-video bg-gray-100 rounded-lg mb-3 border border-gray-200 flex items-center justify-center text-gray-400 text-sm">
+                          Görsel linki girin
+                        </div>
+                      )}
+                      <label className="block text-sm font-medium text-gray-500 mb-1">Ürün görsel linki</label>
+                      <input
+                        type="url"
+                        value={editImageUrl}
+                        onChange={(e) => setEditImageUrl(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                  <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={closeEdit}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                    >
+                      İptal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={saveEdit}
+                      disabled={savingEdit}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    >
+                      {savingEdit ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      Kaydet
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

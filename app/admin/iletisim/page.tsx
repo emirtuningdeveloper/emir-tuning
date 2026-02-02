@@ -12,6 +12,7 @@ const defaultSocial = {
   instagram: '',
   twitter: '',
   youtube: '',
+  tiktok: '',
 }
 
 export default function AdminIletisimPage() {
@@ -41,6 +42,7 @@ export default function AdminIletisimPage() {
           instagram: s.socialMedia?.instagram ?? '',
           twitter: s.socialMedia?.twitter ?? '',
           youtube: s.socialMedia?.youtube ?? '',
+          tiktok: s.socialMedia?.tiktok ?? '',
         })
       })
       .catch(console.error)
@@ -161,7 +163,7 @@ export default function AdminIletisimPage() {
                   Sosyal medya
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {(['facebook', 'instagram', 'twitter', 'youtube'] as const).map((key) => (
+                  {(['facebook', 'instagram', 'twitter', 'youtube', 'tiktok'] as const).map((key) => (
                     <div key={key}>
                       <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{key}</label>
                       <input

@@ -433,6 +433,17 @@ export function getCategoryPathsGrouped(categories: Category[]): { group: string
   return result
 }
 
+/** Slug/title'daki tireleri kaldırır, kelimeler arası boşluk (body-kit-urunleri → Body Kit Uruneri) */
+export function formatCategoryLabel(s: string | undefined): string {
+  if (!s || !s.trim()) return s ?? ''
+  const t = s.trim()
+  if (!t.includes('-')) return t
+  return t
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ')
+}
+
 /** Path veya slug'ı okunabilir kategori yoluna çevirir (örn. "body-kits/body-kit-setler" → "Body Kits > Body Kit Setler") */
 export function getReadableCategoryPath(pathOrSlug: string, categories: Category[]): string {
   if (!pathOrSlug || !pathOrSlug.trim()) return pathOrSlug
@@ -445,9 +456,9 @@ export function getReadableCategoryPath(pathOrSlug: string, categories: Category
   for (const slug of parts) {
     const found = current.find((c) => c.slug === slug)
     if (!found) {
-      return pathOrSlug
+      return parts.map(formatCategoryLabel).join(' > ')
     }
-    titles.push(found.title)
+    titles.push(formatCategoryLabel(found.title))
     current = found.children ?? []
   }
 

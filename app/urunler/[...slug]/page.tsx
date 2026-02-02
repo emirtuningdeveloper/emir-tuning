@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { productCategories, getReadableCategoryPath, Category } from '@/lib/product-categories'
+import { productCategories, getReadableCategoryPath, formatCategoryLabel, Category } from '@/lib/product-categories'
 import { getProxiedImageUrl } from '@/lib/image-proxy'
 import { Loader2, Package, ChevronRight } from 'lucide-react'
 
@@ -19,7 +19,7 @@ export default function UrunlerCategoryPage() {
   const slug = params.slug as string[] | undefined
   const categoryPath = Array.isArray(slug) ? slug.join('/') : ''
   const [categories, setCategories] = useState<Category[]>(productCategories)
-  const categoryTitle = getReadableCategoryPath(categoryPath, categories) || categoryPath || 'Ürünler'
+  const categoryTitle = getReadableCategoryPath(categoryPath, categories) || formatCategoryLabel(categoryPath) || 'Ürünler'
 
   const [products, setProducts] = useState<CategoryProduct[]>([])
   const [outOfStockIds, setOutOfStockIds] = useState<Set<string>>(new Set())
